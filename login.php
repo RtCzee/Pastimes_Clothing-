@@ -35,6 +35,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <div class="auth-page">
   <div class="auth-card">
 
+    <div class="auth-back"><a href="Home.php">← Back to Home</a></div>
+
     <div class="auth-brand">Pastimes</div>
     <div class="auth-title">Welcome Back</div>
     <div class="auth-sub">Login to your account</div>

@@ -36,7 +36,9 @@ $active  = mysqli_query($conn, "SELECT * FROM tblUser WHERE status='active'");
 <div class="auth-page">
   <div class="auth-card" style="max-width:900px;">
 
-    <div class="admin-badge">ADMIN DASHBOARD</div>
+        <div class="auth-back"><a href="Home.php">← Back to Home</a></div>
+
+        <div class="admin-badge">ADMIN DASHBOARD</div>
     <h2 class="auth-title">User Management</h2>
 
     <!-- PENDING USERS -->
