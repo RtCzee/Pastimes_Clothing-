@@ -1161,3 +1161,277 @@ button {
     width: auto;
   }
 }
+/* =========================
+   AUTH PAGES — LOGIN / REGISTER / ADMIN
+   Matches ClothingStore base stylesheet
+========================= */
+ 
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  background: var(--background);
+}
+ 
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2.25rem 2rem;
+}
+ 
+.auth-brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  font-weight: 500;
+  text-align: center;
+  color: var(--foreground);
+}
+ 
+.auth-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.65rem;
+  font-weight: 500;
+  text-align: center;
+  margin: 1.25rem 0 0.3rem;
+  color: var(--foreground);
+}
+ 
+.auth-sub {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.84rem;
+  margin-bottom: 1.75rem;
+}
+ 
+/* Form fields */
+.form-group {
+  margin-bottom: 1rem;
+}
+ 
+.form-label {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.01em;
+}
+ 
+.form-input {
+  width: 100%;
+  padding: 0.78rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--white);
+  color: var(--foreground);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease;
+}
+ 
+.form-input:focus {
+  outline: none;
+  border-color: var(--foreground);
+}
+ 
+.form-input::placeholder {
+  color: #b5aea4;
+}
+ 
+/* Two-column row (first / last name) */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+ 
+/* Primary button */
+.auth-btn {
+  width: 100%;
+  padding: 0.85rem;
+  background: var(--foreground);
+  color: var(--background);
+  border: none;
+  border-radius: var(--radius);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: transform 0.2s ease;
+}
+ 
+.auth-btn:hover {
+  transform: translateY(-1px);
+}
+ 
+/* Password show/hide */
+.password-wrap {
+  position: relative;
+}
+ 
+.password-wrap .form-input {
+  padding-right: 2.75rem;
+}
+ 
+.pw-toggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-family: 'Inter', sans-serif;
+  padding: 0;
+}
+ 
+.pw-toggle:hover {
+  color: var(--foreground);
+}
+ 
+/* Password strength bar (register page) */
+.strength-bar {
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+ 
+.strength-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 2px;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+ 
+.strength-fill--weak   { width: 25%; background: #c96c6c; }
+.strength-fill--fair   { width: 55%; background: #c1a96c; }
+.strength-fill--good   { width: 80%; background: #7aaa6e; }
+.strength-fill--strong { width: 100%; background: #4a8a3d; }
+ 
+/* Helper hint text */
+.field-hint {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 0.35rem;
+}
+ 
+/* Terms checkbox */
+.check-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  margin: 1.25rem 0 0;
+}
+ 
+.check-group input[type="checkbox"] {
+  margin-top: 2px;
+  accent-color: var(--foreground);
+  flex-shrink: 0;
+}
+ 
+.check-group label {
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+ 
+.check-group label a {
+  color: var(--foreground);
+  font-weight: 500;
+  text-decoration: none;
+}
+ 
+/* Footer link (already have account / don't have account) */
+.auth-footer-note {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 1.5rem;
+}
+ 
+.auth-footer-note a {
+  color: var(--foreground);
+  font-weight: 500;
+  text-decoration: none;
+}
+ 
+/* Pending approval notice (register page) */
+.pending-note {
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 1.25rem;
+  text-align: center;
+  line-height: 1.5;
+}
+ 
+.pending-note strong {
+  color: var(--foreground);
+}
+ 
+/* Admin badge (admin login page) */
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 0.2rem 0.55rem;
+  margin-bottom: 1rem;
+}
+ 
+.admin-badge-wrap {
+  text-align: center;
+  margin-top: 1.25rem;
+}
+ 
+/* Role selector — if you add a buyer/seller/admin toggle */
+.role-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+ 
+.role-opt {
+  flex: 1;
+  text-align: center;
+}
+ 
+.role-opt input {
+  display: none;
+}
+ 
+.role-opt label {
+  display: block;
+  padding: 0.6rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.78rem;
+  color: var(--muted);
+  cursor: pointer;
+  background: var(--secondary);
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+ 
+.role-opt input:checked + label {
+  background: var(--foreground);
+  color: var(--background);
+  border-color: var(--foreground);
+}

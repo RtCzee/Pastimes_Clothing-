@@ -110,4 +110,8 @@ render_page_start([
         </form>
     </div>
 </section>
+
+<a href="adminLogin.php" style="position:fixed;bottom:10px;right:10px;font-size:12px;color:gray;">
+Admin
+</a>
 <?php render_page_end(); ?>
