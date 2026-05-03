@@ -220,6 +220,11 @@ function render_product_card($product)
 
 function render_page_start($options = array())
 {
+    // Start session to check login status
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    
     $pageTitle = isset($options['title']) ? $options['title'] : 'Pastimes | Sustainable Thrift Fashion';
     $description = isset($options['description']) ? $options['description'] : 'Discover curated secondhand clothing in South Africa. Sustainable fashion with a story. Give clothes a second chance.';
     $pageName = isset($options['page']) ? $options['page'] : 'Home';
@@ -249,42 +254,45 @@ function render_page_start($options = array())
                     <a class="site-nav__link<?= active_class('Shop', $pageName) ?>" href="Shop.php">Shop</a>
                     <a class="site-nav__link<?= active_class('About', $pageName) ?>" href="About.php">About</a>
                     <a class="site-nav__link<?= active_class('Contact', $pageName) ?>" href="Contact.php">Contact</a>
+                    <a class="site-nav__link" href="adminLogin.php">Admin</a>
                 </nav>
-             <div class="site-header__actions">
+            <div class="site-header__actions">
+                <div class="user-menu">
+                    <?php if (isset($_SESSION['userID'])): ?>
+                        <button class="user-menu__toggle" type="button" data-user-menu-toggle aria-haspopup="true" aria-expanded="false">
+                            <?= site_icon('users', 'icon icon--small') ?>
+                            <span class="user-menu__username"><?= h($_SESSION['username']) ?></span>
+                        </button>
+                        <div class="user-menu__dropdown" data-user-dropdown>
+                            <p class="user-menu__email"><?= isset($_SESSION['email']) ? h($_SESSION['email']) : '' ?></p>
+                            <hr class="user-menu__divider">
+                            <a class="user-menu__link" href="logout.php">Logout</a>
+                        </div>
+                    <?php else: ?>
+                        <a class="user-menu__toggle user-menu__toggle--link" href="login.php" aria-label="Login">
+                            <?= site_icon('users', 'icon icon--small') ?>
+                        </a>
+                    <?php endif; ?>
+                </div>
 
-                <!-- USER ICON -->
-              <div class="user-menu">
-    <a href="login.php" title="Login">
-        <?= site_icon('users', 'icon icon--small') ?>
-    </a>
-
-    <div class="user-dropdown">
-        <a href="login.php">Login</a>
-        <a href="register.php">Register</a>
-    </div>
-</div>
-
-
-                <!-- CART -->
                 <a class="cart-link" href="Cart.php" aria-label="Open cart">
-                <?= site_icon('shopping-bag', 'icon icon--small') ?>
-                <span class="cart-count" data-cart-count>0</span>
-            </a>
+                    <?= site_icon('shopping-bag', 'icon icon--small') ?>
+                    <span class="cart-count" data-cart-count>0</span>
+                </a>
 
-                 <!-- MOBILE MENU -->
-            <button class="menu-toggle" type="button" data-menu-toggle>
-               <span class="menu-toggle__open"><?= site_icon('menu', 'icon icon--small') ?></span>
-               <span class="menu-toggle__close"><?= site_icon('x', 'icon icon--small') ?></span>
-            </button>
-
+                <button class="menu-toggle" type="button" data-menu-toggle>
+                    <span class="menu-toggle__open"><?= site_icon('menu', 'icon icon--small') ?></span>
+                    <span class="menu-toggle__close"><?= site_icon('x', 'icon icon--small') ?></span>
+                </button>
             </div>
-            </div>
+        </div>
             <nav class="site-nav site-nav--mobile" id="mobile-nav" aria-label="Mobile" data-mobile-nav>
                 <div class="container site-nav__mobile-inner">
                     <a class="site-nav__link<?= active_class('Home', $pageName) ?>" href="Home.php">Home</a>
                     <a class="site-nav__link<?= active_class('Shop', $pageName) ?>" href="Shop.php">Shop</a>
                     <a class="site-nav__link<?= active_class('About', $pageName) ?>" href="About.php">About</a>
                     <a class="site-nav__link<?= active_class('Contact', $pageName) ?>" href="Contact.php">Contact</a>
+                    <a class="site-nav__link" href="adminLogin.php">Admin</a>
                 </div>
             </nav>
         </header>

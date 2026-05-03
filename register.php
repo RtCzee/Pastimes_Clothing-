@@ -26,6 +26,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <div class="auth-page">
   <div class="auth-card">
 
+    <div class="auth-back"><a href="Home.php">← Back to Home</a></div>
+
     <div class="auth-brand">Pastimes</div>
     <div class="auth-title">Create Account</div>
     <div class="auth-sub">Join the sustainable fashion movement</div>
