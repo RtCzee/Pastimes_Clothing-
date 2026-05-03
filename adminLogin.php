@@ -19,7 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $result = $stmt->get_result();
     $admin = $result->fetch_assoc();
 
-    if ($admin) {
+    if ($admin && password_verify($password, $admin['password'])) {
 
         $_SESSION['adminID'] = $admin['adminID'];
 
