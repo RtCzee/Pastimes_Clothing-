@@ -399,6 +399,70 @@
     applyFilters();
   };
 
+  // Page animations: hero entrance, scroll reveals, and parallax backgrounds
+  const initAnimations = () => {
+    // Hero entrance animation
+    const heroContent = document.querySelector('.hero__content');
+    if (heroContent) {
+      heroContent.classList.add('animate-in');
+      // play after a short delay for a smooth entrance
+      window.setTimeout(() => heroContent.classList.add('play'), 80);
+    }
+
+    // Intersection observer for reveal on scroll
+    const revealSelectors = ['.section', '.value-card', '.product-card', '.banner__content', '.section-heading'];
+    const revealElements = Array.from(document.querySelectorAll(revealSelectors.join(','))).filter(Boolean);
+
+    if (revealElements.length > 0 && 'IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+            entry.target.classList.remove('is-animated');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12 });
+
+      revealElements.forEach((el) => {
+        // avoid animating elements that are already visible
+        if (el.getBoundingClientRect().top < window.innerHeight) {
+          el.classList.add('revealed');
+        } else {
+          el.classList.add('is-animated');
+          io.observe(el);
+        }
+      });
+    }
+
+    // Parallax for hero/banner backgrounds with enhanced zoom
+    const parallaxImages = Array.from(document.querySelectorAll('.hero__media img, .banner__media img'));
+    if (parallaxImages.length > 0) {
+      let ticking = false;
+      const onScroll = () => {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(() => {
+          parallaxImages.forEach((img) => {
+            const rect = img.parentElement.getBoundingClientRect();
+            const center = rect.top + rect.height / 2 - window.innerHeight / 2;
+            // larger zoom range for more dramatic effect, slower transition
+            const translate = Math.max(-28, Math.min(28, -center * 0.05));
+            const scale = 1.08 + Math.abs(center * 0.0002);
+            img.style.transition = 'transform 2000ms linear';
+            img.style.transform = `translateY(${translate}px) scale(${scale})`;
+          });
+          ticking = false;
+        });
+      };
+
+      // initial call
+      onScroll();
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll);
+    }
+  };
+
   initMenu();
   initUserMenu();
   initSimpleForms();
@@ -407,6 +471,7 @@
   initCartActions();
   initContactForm();
   initShopFilters();
+  initAnimations();
   refreshCartCount();
   renderCartPage();
 })();
