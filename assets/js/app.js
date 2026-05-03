@@ -266,6 +266,26 @@
   };
 
   // Setup product filtering and sorting
+  // Toggle user menu dropdown
+  const initUserMenu = () => {
+    const toggle = document.querySelector('[data-user-menu-toggle]');
+    const dropdown = document.querySelector('[data-user-dropdown]');
+    if (!toggle || !dropdown) {
+      return;
+    }
+
+    toggle.addEventListener('click', () => {
+      dropdown.classList.toggle('is-open');
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!toggle.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.classList.remove('is-open');
+      }
+    });
+  };
+
   const initShopFilters = () => {
     const grid = document.querySelector("[data-shop-grid]");
     if (!grid) {
@@ -380,6 +400,7 @@
   };
 
   initMenu();
+  initUserMenu();
   initSimpleForms();
   initAddToCartButtons();
   initGallery();
