@@ -7,13 +7,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fullname = $_POST['fullname'];
     $email = $_POST['email'];
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $role = $_POST['role']; // get selected role
+
 
     $stmt = $conn->prepare("
-        INSERT INTO tblUser (username, fullName, email, password, status)
-        VALUES (?, ?, ?, ?, 'pending')
+        INSERT INTO tblUser (username, fullName, email, password, role, status)
+        VALUES (?, ?, ?, ?, ?, 'pending')
     ");
 
-    $stmt->bind_param("ssss", $username, $fullname, $email, $password);
+    $stmt->bind_param("sssss", $username, $fullname, $email, $password, $role);
     $stmt->execute();
 
     $message = "Account created. Waiting for admin approval.";
@@ -53,6 +55,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <label class="form-label">Password</label>
         <input class="form-input" name="password" type="password" required>
       </div>
+
+      <div class="role-row">
+      <div class="role-opt">
+      <input type="radio" name="role" value="buyer" id="buyer" checked>
+    <label for="buyer">Buyer</label>
+     </div>
+
+  <div class="role-opt">
+    <input type="radio" name="role" value="seller" id="seller">
+    <label for="seller">Seller</label>
+  </div>
+ </div>
 
       <button class="auth-btn" type="submit">Register</button>
 

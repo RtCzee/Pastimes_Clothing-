@@ -1,5 +1,4 @@
 
-
 <?php
 session_start();
 include("data/DBConn.php");
@@ -15,7 +14,7 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
     $id = (int) $_GET['id'];
 
     if ($_GET['action'] == "approve") {
-        mysqli_query($conn, "UPDATE tblUser SET status='active' WHERE userID=$id");
+        mysqli_query($conn, "UPDATE tblUser SET status='approved' WHERE userID=$id");
     }
 
     if ($_GET['action'] == "decline") {
@@ -28,7 +27,8 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
 
 /* GET USERS */
 $pending = mysqli_query($conn, "SELECT * FROM tblUser WHERE status='pending'");
-$active  = mysqli_query($conn, "SELECT * FROM tblUser WHERE status='active'");
+$active = mysqli_query($conn, "SELECT * FROM tblUser WHERE status='approved'");
+$declined = mysqli_query($conn, "SELECT * FROM tblUser WHERE status='declined'");
 ?>
 
 <link rel="stylesheet" href="assets/css/styles.css">
@@ -73,6 +73,15 @@ $active  = mysqli_query($conn, "SELECT * FROM tblUser WHERE status='active'");
             <span style="float:right;color:var(--muted);">Active</span>
         </div>
     <?php endwhile; ?>
+
+    <h3 class="auth-sub">Declined Users</h3>
+
+      <?php while ($u = mysqli_fetch_assoc($declined)): ?>
+    <div style="padding:10px;border:1px solid var(--border);margin-bottom:10px;border-radius:var(--radius);">
+        <strong><?= $u['username'] ?></strong> - <?= $u['email'] ?>
+        <span style="float:right;color:red;">Declined</span>
+    </div>
+       <?php endwhile; ?>
 
     <div class="auth-footer-note">
         <a href="logout.php">Logout Admin</a>

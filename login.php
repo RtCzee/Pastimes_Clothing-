@@ -14,13 +14,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $result = $stmt->get_result();
     $user = $result->fetch_assoc();
 
-    if ($user && $user['status'] == 'active' && password_verify($password, $user['password'])) {
+    if ($user && $user['status'] == 'approved' && password_verify($password, $user['password'])) {
 
         $_SESSION['userID'] = $user['userID'];
         $_SESSION['username'] = $user['username'];
+        $_SESSION['role'] = $user['role'];
 
+           if ($user['role'] == 'seller') {
+          header("Location: sellerDashboard.php");
+         } else {
         header("Location: Home.php");
-        exit;
+    }
+
+    exit;
 
     } else {
         $error = "Invalid login or account not approved.";
