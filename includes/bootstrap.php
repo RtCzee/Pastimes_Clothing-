@@ -254,6 +254,7 @@ function render_page_start($options = array())
                     <a class="site-nav__link<?= active_class('Shop', $pageName) ?>" href="Shop.php">Shop</a>
                     <a class="site-nav__link<?= active_class('About', $pageName) ?>" href="About.php">About</a>
                     <a class="site-nav__link<?= active_class('Contact', $pageName) ?>" href="Contact.php">Contact</a>
+                    <a class="site-nav__link" href="adminLogin.php">Admin</a>
                 </nav>
             <div class="site-header__actions">
                 <div class="user-menu">
@@ -268,14 +269,9 @@ function render_page_start($options = array())
                             <a class="user-menu__link" href="logout.php">Logout</a>
                         </div>
                     <?php else: ?>
-                        <button class="user-menu__toggle" type="button" data-user-menu-toggle aria-haspopup="true" aria-expanded="false" aria-label="Open account menu">
+                        <a class="user-menu__toggle user-menu__toggle--link" href="login.php" aria-label="Login">
                             <?= site_icon('users', 'icon icon--small') ?>
-                        </button>
-                        <div class="user-menu__dropdown" data-user-dropdown>
-                            <a class="user-menu__link" href="login.php">Login</a>
-                            <a class="user-menu__link" href="register.php">Register</a>
-                            <a class="user-menu__link" href="adminLogin.php">Admin Login</a>
-                        </div>
+                        </a>
                     <?php endif; ?>
                 </div>
 
@@ -296,6 +292,7 @@ function render_page_start($options = array())
                     <a class="site-nav__link<?= active_class('Shop', $pageName) ?>" href="Shop.php">Shop</a>
                     <a class="site-nav__link<?= active_class('About', $pageName) ?>" href="About.php">About</a>
                     <a class="site-nav__link<?= active_class('Contact', $pageName) ?>" href="Contact.php">Contact</a>
+                    <a class="site-nav__link" href="adminLogin.php">Admin</a>
                 </div>
             </nav>
         </header>

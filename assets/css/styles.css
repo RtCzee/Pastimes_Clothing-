@@ -157,6 +157,7 @@ button {
   background: transparent;
   color: var(--foreground);
   cursor: pointer;
+  text-decoration: none;
   transition: color 0.25s ease;
 }
 

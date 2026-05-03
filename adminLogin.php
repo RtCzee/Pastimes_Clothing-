@@ -2,6 +2,11 @@
 session_start();
 include("data/DBConn.php");
 
+if (isset($_SESSION['adminID'])) {
+    header("Location: adminDashboard.php");
+    exit;
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $username = $_POST['username'];
