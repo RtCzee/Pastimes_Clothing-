@@ -1,0 +1,5 @@
+johnnD,John Doe,john@gmail.com,29ef52e7563626a96cea7f4b4085c124
+siHLE_OVU,Sihle Ndlovu,sihle@gmail.com,5f4dcc3b5aa765d61d8327deb882cf99
+MR_khumalo,Mike Khumalo,mike@gmail.com,e99a18c428cb38d5f260853678922e03
+yourgirl_aya,Ayanda Mandla,mandla@gmail.com,25d55ad283aa400af464c76d713c07ad
+ama_baloyi,Amanda Baloyi,david@gmail.com,81dc9bdb52d04dc20036dbd8313ed055

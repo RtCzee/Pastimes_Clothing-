@@ -250,17 +250,34 @@ function render_page_start($options = array())
                     <a class="site-nav__link<?= active_class('About', $pageName) ?>" href="About.php">About</a>
                     <a class="site-nav__link<?= active_class('Contact', $pageName) ?>" href="Contact.php">Contact</a>
                 </nav>
-                <div class="site-header__actions">
-                    <a class="cart-link" href="Cart.php" aria-label="Open cart">
-                        <?= site_icon('shopping-bag', 'icon icon--small') ?>
-                        <span class="cart-count" data-cart-count>0</span>
-                    </a>
-                    <button class="menu-toggle" type="button" data-menu-toggle aria-expanded="false" aria-controls="mobile-nav">
-                        <span class="menu-toggle__open"><?= site_icon('menu', 'icon icon--small') ?></span>
-                        <span class="menu-toggle__close"><?= site_icon('x', 'icon icon--small') ?></span>
-                        <span class="sr-only">Menu</span>
-                    </button>
-                </div>
+             <div class="site-header__actions">
+
+                <!-- USER ICON -->
+              <div class="user-menu">
+    <a href="login.php" title="Login">
+        <?= site_icon('users', 'icon icon--small') ?>
+    </a>
+
+    <div class="user-dropdown">
+        <a href="login.php">Login</a>
+        <a href="register.php">Register</a>
+    </div>
+</div>
+
+
+                <!-- CART -->
+                <a class="cart-link" href="Cart.php" aria-label="Open cart">
+                <?= site_icon('shopping-bag', 'icon icon--small') ?>
+                <span class="cart-count" data-cart-count>0</span>
+            </a>
+
+                 <!-- MOBILE MENU -->
+            <button class="menu-toggle" type="button" data-menu-toggle>
+               <span class="menu-toggle__open"><?= site_icon('menu', 'icon icon--small') ?></span>
+               <span class="menu-toggle__close"><?= site_icon('x', 'icon icon--small') ?></span>
+            </button>
+
+            </div>
             </div>
             <nav class="site-nav site-nav--mobile" id="mobile-nav" aria-label="Mobile" data-mobile-nav>
                 <div class="container site-nav__mobile-inner">
