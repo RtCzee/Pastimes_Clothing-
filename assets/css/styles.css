@@ -1649,6 +1649,12 @@ button {
   border-color: rgba(198, 40, 40, 0.2);
 }
 
+.admin-action-link--delete {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
 .admin-status-chip {
   display: inline-flex;
   align-items: center;

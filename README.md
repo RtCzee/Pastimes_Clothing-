@@ -102,6 +102,18 @@ Pastimes/
 
 ---
 
+## 📚 Documentation
+
+**For detailed role-based system setup, testing procedures, and troubleshooting**, see [docs/SETUP_AND_TESTING.md](docs/SETUP_AND_TESTING.md).
+
+This includes:
+- Step-by-step testing workflows (register seller → approve → add items → view in shop)
+- Role-based feature matrix
+- Database schema changes
+- Security notes and best practices
+
+---
+
 ## Setup & Installation
 
 ### Prerequisites

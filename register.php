@@ -7,16 +7,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fullname = $_POST['fullname'];
     $email = $_POST['email'];
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $role = isset($_POST['role']) && in_array($_POST['role'], ['buyer', 'seller']) ? $_POST['role'] : 'buyer';
 
-    $stmt = $conn->prepare("
-        INSERT INTO tblUser (username, fullName, email, password, status)
-        VALUES (?, ?, ?, ?, 'pending')
+    $stmt = $conn->prepare(" 
+      INSERT INTO tblUser (username, fullName, email, password, status, role)
+      VALUES (?, ?, ?, ?, 'pending', ?)
     ");
 
-    $stmt->bind_param("ssss", $username, $fullname, $email, $password);
-    $stmt->execute();
+    if (!$stmt) {
+      $columnCheck = $conn->query("SHOW COLUMNS FROM tblUser LIKE 'role'");
+      if ($columnCheck && $columnCheck->num_rows === 0) {
+        $conn->query("ALTER TABLE tblUser ADD COLUMN role ENUM('buyer','seller') DEFAULT 'buyer'");
+        $stmt = $conn->prepare(" 
+          INSERT INTO tblUser (username, fullName, email, password, status, role)
+          VALUES (?, ?, ?, ?, 'pending', ?)
+        ");
+      }
+    }
 
-    $message = "Account created. Waiting for admin approval.";
+    if (!$stmt) {
+      die("Registration is unavailable until the database schema is updated: " . $conn->error);
+    }
+
+    $stmt->bind_param("sssss", $username, $fullname, $email, $password, $role);
+
+    if ($stmt->execute()) {
+      $message = "Account created. Waiting for admin approval.";
+    } else {
+      die("Registration failed: " . $stmt->error);
+    }
 }
 ?>
 
@@ -54,6 +73,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <div class="form-group password-wrap">
         <label class="form-label">Password</label>
         <input class="form-input" name="password" type="password" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Account Type</label>
+        <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: normal;">
+            <input type="radio" name="role" value="buyer" checked required style="width: auto; margin: 0;">
+            <span>Buyer</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: normal;">
+            <input type="radio" name="role" value="seller" required style="width: auto; margin: 0;">
+            <span>Seller</span>
+          </label>
+        </div>
       </div>
 
       <button class="auth-btn" type="submit">Register</button>

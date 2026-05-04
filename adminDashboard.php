@@ -9,17 +9,34 @@ if (!isset($_SESSION['adminID'])) {
     exit;
 }
 
-/* APPROVE/DECLINE */
-if (isset($_GET['action']) && isset($_GET['id'])) {
+$actionMessage = '';
 
+/* APPROVE/DECLINE/DELETE/UPDATE */
+if (isset($_GET['action']) && isset($_GET['id'])) {
     $id = (int) $_GET['id'];
 
     if ($_GET['action'] == "approve") {
-        mysqli_query($conn, "UPDATE tblUser SET status='active' WHERE userID=$id");
+        $stmt = $conn->prepare("UPDATE tblUser SET status='active' WHERE userID = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $stmt->close();
+        $actionMessage = 'User approved successfully.';
     }
 
     if ($_GET['action'] == "decline") {
-        mysqli_query($conn, "UPDATE tblUser SET status='declined' WHERE userID=$id");
+        $stmt = $conn->prepare("UPDATE tblUser SET status='declined' WHERE userID = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $stmt->close();
+        $actionMessage = 'User declined.';
+    }
+
+    if ($_GET['action'] == "delete") {
+        $stmt = $conn->prepare("DELETE FROM tblUser WHERE userID = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $stmt->close();
+        $actionMessage = 'User deleted.';
     }
 
     header("Location: adminDashboard.php");
@@ -27,8 +44,8 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
 }
 
 /* GET USERS */
-$pending = mysqli_query($conn, "SELECT * FROM tblUser WHERE status='pending'");
-$active  = mysqli_query($conn, "SELECT * FROM tblUser WHERE status='active'");
+$pending = mysqli_query($conn, "SELECT * FROM tblUser WHERE status='pending' ORDER BY userID DESC");
+$active  = mysqli_query($conn, "SELECT * FROM tblUser WHERE status='active' ORDER BY userID DESC");
 $pendingCount = mysqli_num_rows($pending);
 $activeCount = mysqli_num_rows($active);
 ?>
@@ -79,10 +96,17 @@ $activeCount = mysqli_num_rows($active);
                             <div>
                                 <div class="admin-user-name"><?= htmlspecialchars($u['username']) ?></div>
                                 <div class="admin-user-email"><?= htmlspecialchars($u['email']) ?></div>
+                                <div style="font-size: 0.8rem; color: var(--muted); margin-top: 0.3rem;">
+                                    <strong><?= htmlspecialchars($u['fullName']) ?></strong> • 
+                                    <span style="background: var(--accent); color: white; padding: 0.2rem 0.5rem; border-radius: 999px; font-size: 0.75rem; text-transform: capitalize;">
+                                        <?= htmlspecialchars($u['role'] ?? 'buyer') ?>
+                                    </span>
+                                </div>
                             </div>
                             <div class="admin-user-actions">
                                 <a href="adminDashboard.php?action=approve&id=<?= $u['userID'] ?>" class="admin-action-link admin-action-link--approve">Approve</a>
                                 <a href="adminDashboard.php?action=decline&id=<?= $u['userID'] ?>" class="admin-action-link admin-action-link--decline">Decline</a>
+                                <a href="adminDashboard.php?action=delete&id=<?= $u['userID'] ?>" class="admin-action-link admin-action-link--delete" onclick="return confirm('Delete this user?')">Delete</a>
                             </div>
                         </div>
                     <?php endwhile; ?>
@@ -105,8 +129,17 @@ $activeCount = mysqli_num_rows($active);
                             <div>
                                 <div class="admin-user-name"><?= htmlspecialchars($u['username']) ?></div>
                                 <div class="admin-user-email"><?= htmlspecialchars($u['email']) ?></div>
+                                <div style="font-size: 0.8rem; color: var(--muted); margin-top: 0.3rem;">
+                                    <strong><?= htmlspecialchars($u['fullName']) ?></strong> • 
+                                    <span style="background: var(--accent); color: white; padding: 0.2rem 0.5rem; border-radius: 999px; font-size: 0.75rem; text-transform: capitalize;">
+                                        <?= htmlspecialchars($u['role'] ?? 'buyer') ?>
+                                    </span>
+                                </div>
                             </div>
-                            <span class="admin-status-chip">Active</span>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <span class="admin-status-chip">Active</span>
+                                <a href="adminDashboard.php?action=delete&id=<?= $u['userID'] ?>" class="admin-action-link admin-action-link--delete" onclick="return confirm('Delete this user?')">Delete</a>
+                            </div>
                         </div>
                     <?php endwhile; ?>
                 </div>

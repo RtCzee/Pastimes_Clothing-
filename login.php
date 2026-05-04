@@ -54,6 +54,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['userID'] = $user['userID'];
         $_SESSION['username'] = $user['username'];
         $_SESSION['email'] = $user['email'];
+        $_SESSION['fullName'] = $user['fullName'];
+        $_SESSION['role'] = $user['role'] ?? 'buyer';
+        $_SESSION['logged_in'] = true;
         $userData = $user;
       }
     }

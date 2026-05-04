@@ -3,6 +3,53 @@
 // Load all products from the data file
 $siteProducts = require __DIR__ . '/../data/products.php';
 
+// Merge DB-backed seller items into the product list (if DB available)
+if (file_exists(__DIR__ . '/../data/DBConn.php')) {
+    include_once __DIR__ . '/../data/DBConn.php';
+    if (isset($conn) && $conn) {
+        $dbItems = [];
+        $res = $conn->query("SELECT c.*, u.username as sellerName, u.status as sellerStatus FROM tblClothes c LEFT JOIN tblUser u ON c.sellerID = u.userID ORDER BY c.itemID DESC");
+        if ($res) {
+            while ($r = $res->fetch_assoc()) {
+                // Only include items belonging to active sellers
+                if (isset($r['sellerStatus']) && $r['sellerStatus'] !== 'active') {
+                    continue;
+                }
+
+                // Skip items without an image
+                if (empty($r['image'])) {
+                    continue;
+                }
+
+                $id = 1000 + (int)$r['itemID'];
+                $image = !empty($r['image']) ? $r['image'] : 'assets/images/product-placeholder.jpg';
+
+                $dbItems[] = [
+                    'id' => (string)$id,
+                    'name' => $r['itemName'] ?? 'Seller Item',
+                    'price' => isset($r['price']) ? (float)$r['price'] : 0,
+                    'category' => 'Tops',
+                    'size' => 'M',
+                    'condition' => 'Good',
+                    'description' => $r['description'] ?? '',
+                    'image' => $image,
+                    'images' => [$image],
+                    'featured' => false,
+                    'new' => false,
+                    'sellerName' => $r['sellerName'] ?? null,
+                    // keep a reference to original DB id for internal use
+                    'db_item_id' => (int)$r['itemID'],
+                ];
+            }
+        }
+
+        if (!empty($dbItems)) {
+            // Append DB items after the static products
+            $siteProducts = array_merge($siteProducts, $dbItems);
+        }
+    }
+}
+
 // Get all products
 function site_products()
 {
@@ -254,6 +301,9 @@ function render_page_start($options = array())
                     <a class="site-nav__link<?= active_class('Shop', $pageName) ?>" href="Shop.php">Shop</a>
                     <a class="site-nav__link<?= active_class('About', $pageName) ?>" href="About.php">About</a>
                     <a class="site-nav__link<?= active_class('Contact', $pageName) ?>" href="Contact.php">Contact</a>
+                    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'seller'): ?>
+                        <a class="site-nav__link<?= active_class('Seller', $pageName) ?>" href="sellerDashboard.php">My Listings</a>
+                    <?php endif; ?>
                     <a class="site-nav__link" href="adminLogin.php">Admin</a>
                 </nav>
             <div class="site-header__actions">
@@ -292,6 +342,9 @@ function render_page_start($options = array())
                     <a class="site-nav__link<?= active_class('Shop', $pageName) ?>" href="Shop.php">Shop</a>
                     <a class="site-nav__link<?= active_class('About', $pageName) ?>" href="About.php">About</a>
                     <a class="site-nav__link<?= active_class('Contact', $pageName) ?>" href="Contact.php">Contact</a>
+                    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'seller'): ?>
+                        <a class="site-nav__link<?= active_class('Seller', $pageName) ?>" href="sellerDashboard.php">My Listings</a>
+                    <?php endif; ?>
                     <a class="site-nav__link" href="adminLogin.php">Admin</a>
                 </div>
             </nav>

@@ -20,7 +20,8 @@ CREATE TABLE tblUser (
     fullName VARCHAR(100),
     email VARCHAR(100) UNIQUE,
     password VARCHAR(255),
-    status ENUM('pending','active','declined') DEFAULT 'pending'
+    status ENUM('pending','active','declined') DEFAULT 'pending',
+    role ENUM('buyer','seller') DEFAULT 'buyer'
 )
 ");
 
@@ -43,10 +44,12 @@ CREATE TABLE tblAdmin (
 mysqli_query($conn, "
 CREATE TABLE tblClothes (
     itemID INT AUTO_INCREMENT PRIMARY KEY,
+    sellerID INT,
     itemName VARCHAR(100),
     description VARCHAR(255),
     price DECIMAL(10,2),
-    image VARCHAR(200)
+    image VARCHAR(200),
+    FOREIGN KEY (sellerID) REFERENCES tblUser(userID)
 )
 ");
 
