@@ -259,6 +259,14 @@ function render_product_card($product)
                 >
                     Add to Cart
                 </button>
+                <button
+                    class="button button--ghost button--small"
+                    type="button"
+                    data-wishlist-toggle="<?= h($product['id']) ?>"
+                    data-product-name="<?= h($product['name']) ?>"
+                >
+                    <?= site_icon('heart', 'icon icon--tiny') ?> Save
+                </button>
             </div>
         </div>
     </article>
@@ -324,6 +332,11 @@ function render_page_start($options = array())
                         </a>
                     <?php endif; ?>
                 </div>
+
+                <a class="cart-link" href="Wishlist.php" aria-label="Open wishlist">
+                    <?= site_icon('heart', 'icon icon--small') ?>
+                    <span class="cart-count" data-wishlist-count>0</span>
+                </a>
 
                 <a class="cart-link" href="Cart.php" aria-label="Open cart">
                     <?= site_icon('shopping-bag', 'icon icon--small') ?>

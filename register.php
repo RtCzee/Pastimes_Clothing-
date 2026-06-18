@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bind_param("sssss", $username, $fullname, $email, $password, $role);
 
     if ($stmt->execute()) {
-      $message = "Account created. Waiting for admin approval.";
+      $message = "Thanks for registering. Your account is waiting for admin approval.";
     } else {
       die("Registration failed: " . $stmt->error);
     }

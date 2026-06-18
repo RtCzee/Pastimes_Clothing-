@@ -42,7 +42,7 @@ render_page_start([
                         <span>Total</span>
                         <strong data-cart-total>R0</strong>
                     </div>
-                    <button class="button button--full" type="button">Proceed to Checkout</button>
+                    <button class="button button--full" type="button" data-checkout-button>Proceed to Checkout</button>
                     <p class="summary-box__secure">Secure checkout powered by Stripe</p>
                 </aside>
             </div>

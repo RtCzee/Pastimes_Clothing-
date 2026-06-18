@@ -60,12 +60,48 @@ CREATE TABLE tblClothes (
 mysqli_query($conn, "
 CREATE TABLE tblAorder (
     orderID INT AUTO_INCREMENT PRIMARY KEY,
+    checkoutReference VARCHAR(40),
     userID INT,
     itemID INT,
     quantity INT,
     orderDate DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (userID) REFERENCES tblUser(userID),
     FOREIGN KEY (itemID) REFERENCES tblClothes(itemID)
+)
+");
+
+
+// CREATE tblReview
+
+mysqli_query($conn, "
+CREATE TABLE tblReview (
+    reviewID INT AUTO_INCREMENT PRIMARY KEY,
+    productId VARCHAR(40),
+    userID INT,
+    username VARCHAR(50),
+    rating INT,
+    comment TEXT,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userID) REFERENCES tblUser(userID)
+)
+");
+
+
+// CREATE tblCheckout
+
+mysqli_query($conn, "
+CREATE TABLE tblCheckout (
+    checkoutID INT AUTO_INCREMENT PRIMARY KEY,
+    checkoutReference VARCHAR(40) UNIQUE,
+    userID INT,
+    itemCount INT,
+    subtotal DECIMAL(10,2),
+    shipping DECIMAL(10,2),
+    total DECIMAL(10,2),
+    cartSnapshot LONGTEXT,
+    status VARCHAR(20) DEFAULT 'completed',
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userID) REFERENCES tblUser(userID)
 )
 ");
 

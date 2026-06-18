@@ -53,6 +53,7 @@ INSERT INTO `tbladmin` (`adminID`, `username`, `email`, `password`) VALUES
 DROP TABLE IF EXISTS `tblaorder`;
 CREATE TABLE IF NOT EXISTS `tblaorder` (
   `orderID` int(11) NOT NULL AUTO_INCREMENT,
+  `checkoutReference` varchar(40) DEFAULT NULL,
   `userID` int(11) DEFAULT NULL,
   `itemID` int(11) DEFAULT NULL,
   `quantity` int(11) DEFAULT NULL,
@@ -60,6 +61,48 @@ CREATE TABLE IF NOT EXISTS `tblaorder` (
   PRIMARY KEY (`orderID`),
   KEY `userID` (`userID`),
   KEY `itemID` (`itemID`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tblreview`
+--
+
+DROP TABLE IF EXISTS `tblreview`;
+CREATE TABLE IF NOT EXISTS `tblreview` (
+  `reviewID` int(11) NOT NULL AUTO_INCREMENT,
+  `productId` varchar(40) DEFAULT NULL,
+  `userID` int(11) DEFAULT NULL,
+  `username` varchar(50) DEFAULT NULL,
+  `rating` int(11) DEFAULT NULL,
+  `comment` text DEFAULT NULL,
+  `createdAt` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`reviewID`),
+  KEY `userID` (`userID`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tblcheckout`
+--
+
+DROP TABLE IF EXISTS `tblcheckout`;
+CREATE TABLE IF NOT EXISTS `tblcheckout` (
+  `checkoutID` int(11) NOT NULL AUTO_INCREMENT,
+  `checkoutReference` varchar(40) DEFAULT NULL,
+  `userID` int(11) DEFAULT NULL,
+  `itemCount` int(11) DEFAULT NULL,
+  `subtotal` decimal(10,2) DEFAULT NULL,
+  `shipping` decimal(10,2) DEFAULT NULL,
+  `total` decimal(10,2) DEFAULT NULL,
+  `cartSnapshot` longtext DEFAULT NULL,
+  `status` varchar(20) DEFAULT 'completed',
+  `createdAt` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`checkoutID`),
+  UNIQUE KEY `checkoutReference` (`checkoutReference`),
+  KEY `userID` (`userID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

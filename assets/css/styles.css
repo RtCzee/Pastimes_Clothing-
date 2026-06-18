@@ -390,6 +390,12 @@ button {
   color: var(--white);
 }
 
+.button--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--foreground);
+}
+
 .button--ghost-light:hover {
   background: var(--white);
   color: var(--foreground);
@@ -600,7 +606,12 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 0.75rem;
+}
+
+.product-card__bottom .button {
+  flex: 1 1 8rem;
 }
 
 .product-card__price-wrap {
@@ -1067,6 +1078,48 @@ button {
   display: flex;
   gap: 0.75rem;
   align-items: center;
+}
+
+.alert-card,
+.review-summary,
+.review-form,
+.review-item {
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--white);
+}
+
+.alert-card,
+.review-form,
+.review-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.alert-card__head,
+.review-item__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.review-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.review-note {
+  color: var(--muted);
+}
+
+.review-item p,
+.alert-card p {
+  margin: 0;
 }
 
 .related-section {

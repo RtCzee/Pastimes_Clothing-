@@ -232,8 +232,8 @@ Pastimes/
 
 - [ ] Add order/purchase system
 - [ ] Implement seller ratings/reviews
-- [ ] Cart checkout functionality
 - [ ] Wishlist feature
+- [ ] Price drop alerts
 - [ ] Messaging between buyers/sellers
 - [ ] Admin user edit (change email/name)
 - [ ] Password reset flow
