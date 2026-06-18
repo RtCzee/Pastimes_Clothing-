@@ -314,7 +314,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Author
 
-**RtCzee** — Web Developer  
+**RtCzee** — Software Engineer  
 GitHub: [@RtCzee](https://github.com/RtCzee)
 
 ---
