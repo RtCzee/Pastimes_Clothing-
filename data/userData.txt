@@ -4,6 +4,6 @@ MR_khumalo,Mike Khumalo,mike@gmail.com,$2y$10$eM/LeXYFoSgtuRIDcNskUuL3wRw94tUcZQ
 yourgirl_aya,Ayanda Mandla,mandla@gmail.com,$2y$10$frGo0F.OpRhfet43vWlqM.zMgVBi.BbJy5ic5MpASCxlyB7fjIewa
 ama_baloyi,Amanda Baloyi,david@gmail.com,$2y$10$vRuqR4plV5ihFIFKaaDOu.B3EncPUlViXB7NXHw6JyOnuScufN5KK
 admin,Admin@1,admin@store,$2y$10$h2YN.cfQjIpQvgTZxeSuVOVkoOfzLkAKNHgghLsWm.yvjqq36rVfy
-Styzey._,didi,didintlekutlwano@gmail.com,$2y$10$lBaNfVXnZPOyTtL85L2e9.ZMO56B4/5xhr7nc1lBubMTjBD3kXu3G
+Styzey._,didi,didintlekutlwano@gmail.com,test@1
 Pentacost_08,pentacost,pentacost8@gmail.com,$2y$10$.hopsXGNs70ra8NTJqs8Wuj2P8ne/EvOwl71Gy4vfBa65ALn0TaOi
 testseller,seller,testseller@gmail.com,$2y$10$OyOkUHvLRH0J4Z.SLTmqde1B45XVujy3jDJv.HNYvq7B4tEwKalxi

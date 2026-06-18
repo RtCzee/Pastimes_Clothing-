@@ -1,6 +1,8 @@
 (() => {
   // Store cart data in localStorage
   const CART_KEY = "pastimes-cart";
+  const WISHLIST_KEY = "pastimes-wishlist";
+  const PRICE_ALERT_KEY = "pastimes-price-alerts";
   const products = Array.isArray(window.PASTIMES_PRODUCTS) ? window.PASTIMES_PRODUCTS : [];
 
   // Find a product by ID
@@ -75,9 +77,263 @@
     writeCart([]);
   };
 
-  // Format number as South African Rand currency
+  const readJsonStorage = (key) => {
+    try {
+      const raw = window.localStorage.getItem(key);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      return [];
+    }
+  };
+
+  const writeJsonStorage = (key, value) => {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  };
+
   const formatPrice = (value) =>
     `R${new Intl.NumberFormat("en-ZA", { maximumFractionDigits: 0 }).format(value)}`;
+
+  const escapeHtml = (value) =>
+    String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+
+  const readWishlist = () => readJsonStorage(WISHLIST_KEY);
+
+  const resolveWishlistProduct = (entry) => {
+    const fromCatalog = getProductById(entry.id);
+    if (fromCatalog) {
+      return fromCatalog;
+    }
+    if (entry && entry.name && entry.image) {
+      return entry;
+    }
+    return null;
+  };
+
+  const writeWishlist = (wishlist) => {
+    writeJsonStorage(WISHLIST_KEY, wishlist);
+    refreshWishlistCount();
+    syncWishlistButtons();
+    renderWishlistPage();
+  };
+
+  const readPriceAlerts = () => readJsonStorage(PRICE_ALERT_KEY);
+  const writePriceAlerts = (alerts) => {
+    writeJsonStorage(PRICE_ALERT_KEY, alerts);
+    updatePriceAlertState();
+  };
+
+  const refreshWishlistCount = () => {
+    const total = readWishlist().length;
+    document.querySelectorAll("[data-wishlist-count]").forEach((element) => {
+      element.textContent = String(total);
+      element.classList.toggle("is-hidden", total === 0);
+    });
+  };
+
+  const isWishlisted = (productId) => readWishlist().some((item) => String(item.id) === String(productId));
+
+  const syncWishlistButtons = () => {
+    document.querySelectorAll("[data-wishlist-toggle]").forEach((button) => {
+      const id = button.getAttribute("data-wishlist-toggle");
+      const active = isWishlisted(id);
+      const saveLabel = button.getAttribute("data-wishlist-label-save") || "Save";
+      const labelNode = button.querySelector("[data-wishlist-label]");
+
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", active ? "true" : "false");
+
+      if (labelNode) {
+        labelNode.textContent = active ? "Saved" : saveLabel;
+      } else {
+        button.textContent = active ? "Saved" : saveLabel;
+      }
+    });
+  };
+
+  const toggleWishlist = (productId) => {
+    if (!productId) {
+      return;
+    }
+
+    const wishlist = readWishlist();
+    const index = wishlist.findIndex((item) => String(item.id) === String(productId));
+    const added = index < 0;
+
+    if (index >= 0) {
+      wishlist.splice(index, 1);
+    } else {
+      const product = getProductById(productId);
+      wishlist.push({
+        id: String(productId),
+        name: product?.name || "Saved item",
+        price: product?.price || 0,
+        image: product?.image || "assets/images/product-placeholder.jpg",
+        category: product?.category || "Tops",
+        size: product?.size || "M",
+        condition: product?.condition || "Good",
+      });
+    }
+
+    writeWishlist(wishlist);
+
+    const product = getProductById(productId);
+    const toast = document.querySelector("[data-wishlist-toast]");
+    if (toast) {
+      toast.textContent = added
+        ? `${product?.name || "Item"} added to wishlist`
+        : `${product?.name || "Item"} removed from wishlist`;
+      toast.classList.add("is-visible");
+      window.clearTimeout(toast._hideTimer);
+      toast._hideTimer = window.setTimeout(() => toast.classList.remove("is-visible"), 2200);
+    }
+  };
+
+  const renderWishlistPage = () => {
+    const grid = document.querySelector("[data-wishlist-grid]");
+    if (!grid) {
+      return;
+    }
+
+    const empty = document.querySelector("[data-wishlist-empty]");
+    const pageWrap = document.querySelector("[data-wishlist-page]");
+    const saved = readWishlist().map(resolveWishlistProduct).filter(Boolean);
+
+    if (saved.length === 0) {
+      grid.innerHTML = "";
+      if (pageWrap) pageWrap.classList.add("is-hidden");
+      if (empty) empty.classList.remove("is-hidden");
+      return;
+    }
+
+    if (pageWrap) pageWrap.classList.remove("is-hidden");
+    if (empty) empty.classList.add("is-hidden");
+    grid.innerHTML = saved
+      .map(
+        (item) => `
+          <article class="product-card revealed" data-product-id="${escapeHtml(item.id)}">
+            <a class="product-card__image-link" href="Product.php?id=${encodeURIComponent(item.id)}">
+              <div class="product-card__image-wrap">
+                <img class="product-card__image" src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">
+              </div>
+            </a>
+            <div class="product-card__body">
+              <div class="product-card__top">
+                <div>
+                  <a class="product-card__title-link" href="Product.php?id=${encodeURIComponent(item.id)}">
+                    <h3 class="product-card__title">${escapeHtml(item.name)}</h3>
+                  </a>
+                  <p class="product-card__meta">${escapeHtml(item.category)} &middot; Size ${escapeHtml(item.size)}</p>
+                </div>
+              </div>
+              <div class="product-card__bottom">
+                <div class="product-card__price-wrap">
+                  <span class="product-card__price">${formatPrice(item.price)}</span>
+                </div>
+                <button class="button button--outline button--small" type="button" data-add-to-cart="${escapeHtml(item.id)}">Add to Cart</button>
+                <button class="button button--ghost button--small is-active" type="button" data-wishlist-toggle="${escapeHtml(item.id)}" data-wishlist-label-save="Save">
+                  <svg class="icon icon--tiny" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 21-1.4-1.2C5.4 15 2 11.9 2 8a4 4 0 0 1 7-2.6A4 4 0 0 1 16 8c0 3.9-3.4 7-8.6 11.8Z"/></svg>
+                  <span data-wishlist-label>Saved</span>
+                </button>
+              </div>
+            </div>
+          </article>
+        `
+      )
+      .join("");
+
+    syncWishlistButtons();
+  };
+  //what this does is it checks if there is a price alert set for the current product and updates the status text and target price input accordingly. It also compares the current product price with the alert target price to show if the alert is "Triggered" or just "Saved". This function is called after saving a price alert and on page load to ensure the UI reflects the correct state.
+  const updatePriceAlertState = () => {
+    const statusNode = document.querySelector("[data-price-alert-status]");
+    const form = document.querySelector("[data-price-alert-form]");
+    const triggerButton = document.querySelector("[data-price-alert-save]");
+    if (!statusNode || !form || !triggerButton) {
+      return;
+    }
+      //this retrieves the product ID from the save button's data attribute, finds the corresponding product, and checks if there is an existing price alert for that product. If an alert exists, it updates the target price input and status text based on whether the current price meets the alert condition. If no alert exists, it sets the status to "Inactive".
+    const productId = triggerButton.getAttribute("data-price-alert-save");
+    const targetInput = form.querySelector("[data-price-alert-target]");
+    const product = getProductById(productId);
+    if (!product || !targetInput) {
+      return;
+    }
+      //this part reads the saved price alerts from localStorage, finds if there is an alert for the current product, and updates the UI accordingly. If the product price is less than or equal to the target price, it shows "Triggered"; otherwise, it shows "Saved". If no alert is found, it shows "Inactive".
+    const alerts = readPriceAlerts();
+    const alert = alerts.find((item) => String(item.id) === String(productId));
+    if (alert) {
+      targetInput.value = String(alert.targetPrice);
+      statusNode.textContent = Number(product.price) <= Number(alert.targetPrice) ? "Triggered" : "Saved";
+    } else {
+      statusNode.textContent = "Inactive";
+    }
+  };
+    //this function initializes the wishlist toggle buttons on product cards and the wishlist page. It adds click event listeners to all buttons with the data attribute "data-wishlist-toggle" to call the toggleWishlist 
+    // function when clicked. It also calls syncWishlistButtons to update the button states based on the current wishlist and refreshWishlistCount to update the wishlist count badge in the UI.
+  const initWishlistButtons = () => {
+    document.addEventListener("click", (event) => {
+      const wishlistButton = event.target.closest("[data-wishlist-toggle]");
+      if (wishlistButton) {
+        event.preventDefault();
+        event.stopPropagation();
+        toggleWishlist(wishlistButton.getAttribute("data-wishlist-toggle"));
+        return;
+      }
+
+      const cartButton = event.target.closest("[data-add-to-cart]");
+      if (cartButton) {
+        event.preventDefault();
+        addToCart(cartButton.getAttribute("data-add-to-cart"));
+      }
+    });
+
+    syncWishlistButtons();
+    refreshWishlistCount();
+  };
+
+  const initWishlistPage = () => {
+    if (!document.querySelector("[data-wishlist-grid]")) {
+      return;
+    }
+
+    renderWishlistPage();
+  };
+
+  const initPriceAlerts = () => {
+    const form = document.querySelector("[data-price-alert-form]");
+    const triggerButton = document.querySelector("[data-price-alert-save]");
+    if (!form || !triggerButton) {
+      return;
+    }
+        // this event/ form submission handler preventsm
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const productId = triggerButton.getAttribute("data-price-alert-save");
+      const targetInput = form.querySelector("[data-price-alert-target]");
+      if (!productId || !targetInput) {
+        return;
+      }
+        //this part retrieves the target price from the input field and validates it 
+      const targetPrice = Number(targetInput.value);
+      if (!Number.isFinite(targetPrice) || targetPrice <= 0) {
+        window.alert("Please enter a valid target price.");
+        return;
+      }
+        // 
+      const alerts = readPriceAlerts().filter((item) => String(item.id) !== String(productId));
+      alerts.push({ id: String(productId), targetPrice });
+      writePriceAlerts(alerts);
+      updatePriceAlertState();
+      window.alert("Price alert saved. Reload this page after a price change to see the status update.");
+    });
+
+    updatePriceAlertState();
+  };
 
   // Toggle mobile menu visibility
   const initMenu = () => {
@@ -105,12 +361,6 @@
 
   // Setup add to cart buttons on product cards and detail page
   const initAddToCartButtons = () => {
-    document.querySelectorAll("[data-add-to-cart]").forEach((button) => {
-      button.addEventListener("click", () => {
-        addToCart(button.getAttribute("data-add-to-cart"));
-      });
-    });
-
     const detailButton = document.querySelector("[data-product-add]");
     const detailLabel = document.querySelector("[data-product-add-label]");
     if (detailButton && detailLabel) {
@@ -235,6 +485,51 @@
   const initCartActions = () => {
     document.querySelectorAll("[data-clear-cart]").forEach((button) => {
       button.addEventListener("click", clearCart);
+    });
+  };
+
+  // Submit the cart to the server and clear it after checkout
+  const initCheckoutFlow = () => {
+    const button = document.querySelector("[data-checkout-button]");
+    if (!button) {
+      return;
+    }
+
+    button.addEventListener("click", async () => {
+      const items = readCart();
+      if (items.length === 0) {
+        window.location.href = "login.php";
+        return;
+      }
+
+      const originalLabel = button.textContent;
+      button.disabled = true;
+      button.textContent = "Checking out...";
+
+      try {
+        const response = await window.fetch("checkout.php", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ items }),
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || !payload.success) {
+          const message = payload.message || "Checkout could not be completed.";
+          window.alert(message);
+          return;
+        }
+
+        writeCart([]);
+        window.location.href = payload.redirectUrl || `login.php?checkout=success&reference=${encodeURIComponent(payload.reference || "")}`;
+      } catch (error) {
+        window.alert("Checkout failed. Please try again.");
+      } finally {
+        button.disabled = false;
+        button.textContent = originalLabel;
+      }
     });
   };
 
@@ -467,11 +762,16 @@
   initUserMenu();
   initSimpleForms();
   initAddToCartButtons();
+  initWishlistButtons();
   initGallery();
   initCartActions();
+  initCheckoutFlow();
+  initPriceAlerts();
+  initWishlistPage();
   initContactForm();
   initShopFilters();
   initAnimations();
   refreshCartCount();
   renderCartPage();
+  refreshWishlistCount();
 })();

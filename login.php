@@ -4,11 +4,23 @@ include("data/DBConn.php");
 
 $error = null;
 $userData = null;
+$checkoutSuccess = isset($_GET['checkout']) && $_GET['checkout'] === 'success';
+$checkoutReference = isset($_GET['reference']) ? trim($_GET['reference']) : '';
+$redirectAfter = isset($_GET['redirect']) ? trim($_GET['redirect']) : '';
+if ($redirectAfter !== '' && !preg_match('/^[A-Za-z0-9_.?=&%-]+$/', $redirectAfter)) {
+  $redirectAfter = '';
+}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $username = isset($_POST['username']) ? trim($_POST['username']) : '';
   $email = isset($_POST['email']) ? trim($_POST['email']) : '';
   $password = isset($_POST['password']) ? $_POST['password'] : '';
+  if ($redirectAfter === '' && isset($_POST['redirect'])) {
+    $redirectAfter = trim($_POST['redirect']);
+    if ($redirectAfter !== '' && !preg_match('/^[A-Za-z0-9_.?=&%-]+$/', $redirectAfter)) {
+      $redirectAfter = '';
+    }
+  }
 
   // Validate that at least one identifier is provided
   if (empty($username) && empty($email)) {
@@ -57,6 +69,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['fullName'] = $user['fullName'];
         $_SESSION['role'] = $user['role'] ?? 'buyer';
         $_SESSION['logged_in'] = true;
+
+        if ($redirectAfter !== '') {
+          header('Location: ' . $redirectAfter);
+          exit;
+        }
+
         $userData = $user;
       }
     }
@@ -74,6 +92,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <!-- LOGIN SUCCESS - DISPLAY USER DATA -->
     <div class="auth-brand">Pastimes</div>
     <div class="auth-title" style="color: var(--accent);">✓ Login Successful</div>
+    <div class="login-success-message" style="background: rgba(27, 94, 32, 0.1); padding: 1rem; border-radius: var(--radius); margin-bottom: 1.5rem; text-align: center;">
+      <p style="font-size: 1.05rem; font-weight: 600; color: var(--foreground); margin: 0;">
+        Thanks for logging in, <?= htmlspecialchars($userData['fullName']) ?>.
+      </p>
+    </div>
         
     <div class="login-success-message" style="background: rgba(76, 175, 80, 0.1); padding: 1rem; border-radius: var(--radius); margin-bottom: 1.5rem; text-align: center;">
       <p style="font-size: 1.1rem; font-weight: 600; color: var(--foreground);">
@@ -126,6 +149,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="auth-title">Welcome Back</div>
     <div class="auth-sub">Login to your account</div>
 
+    <?php if ($checkoutSuccess): ?>
+      <p class="pending-note" style="background-color: rgba(27, 94, 32, 0.12); color: #1b5e20; padding: 0.75rem; border-radius: var(--radius); margin-bottom: 1rem; font-size: 0.95rem;">
+        Thanks for your purchase<?= $checkoutReference !== '' ? ' • Reference: ' . htmlspecialchars($checkoutReference) : '' ?>. Please log in again to continue shopping.
+      </p>
+    <?php endif; ?>
+
     <?php if ($error): ?>
       <p class="pending-note" style="background-color: rgba(244, 67, 54, 0.15); color: #d32f2f; padding: 0.75rem; border-radius: var(--radius); margin-bottom: 1rem; font-size: 0.95rem;">
         <?= htmlspecialchars($error) ?>
@@ -133,6 +162,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <?php endif; ?>
 
     <form method="POST">
+      <?php if ($redirectAfter !== ''): ?>
+        <input type="hidden" name="redirect" value="<?= htmlspecialchars($redirectAfter) ?>">
+      <?php endif; ?>
       <div class="form-group">
         <label class="form-label">Username</label>
         <input 

@@ -4,6 +4,7 @@ include(__DIR__ . "/DBConn.php");
 
   // DROP TABLES (IMPORTANT ORDER)
 
+mysqli_query($conn, "DROP TABLE IF EXISTS tblMessage");
 mysqli_query($conn, "DROP TABLE IF EXISTS tblAorder");
 mysqli_query($conn, "DROP TABLE IF EXISTS tblClothes");
 mysqli_query($conn, "DROP TABLE IF EXISTS tblAdmin");
@@ -48,6 +49,9 @@ CREATE TABLE tblClothes (
     itemName VARCHAR(100),
     description VARCHAR(255),
     price DECIMAL(10,2),
+    category VARCHAR(50) DEFAULT 'Tops',
+    size VARCHAR(20) DEFAULT 'M',
+    `condition` VARCHAR(20) DEFAULT 'Good',
     image VARCHAR(200),
     FOREIGN KEY (sellerID) REFERENCES tblUser(userID)
 )
@@ -60,11 +64,68 @@ CREATE TABLE tblClothes (
 mysqli_query($conn, "
 CREATE TABLE tblAorder (
     orderID INT AUTO_INCREMENT PRIMARY KEY,
+    checkoutReference VARCHAR(40),
     userID INT,
     itemID INT,
     quantity INT,
     orderDate DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (userID) REFERENCES tblUser(userID),
+    FOREIGN KEY (itemID) REFERENCES tblClothes(itemID)
+)
+");
+
+
+// CREATE tblReview
+
+mysqli_query($conn, "
+CREATE TABLE tblReview (
+    reviewID INT AUTO_INCREMENT PRIMARY KEY,
+    productId VARCHAR(40),
+    userID INT,
+    username VARCHAR(50),
+    rating INT,
+    comment TEXT,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userID) REFERENCES tblUser(userID)
+)
+");
+
+
+// CREATE tblCheckout
+
+mysqli_query($conn, "
+CREATE TABLE tblCheckout (
+    checkoutID INT AUTO_INCREMENT PRIMARY KEY,
+    checkoutReference VARCHAR(40) UNIQUE,
+    userID INT,
+    itemCount INT,
+    subtotal DECIMAL(10,2),
+    shipping DECIMAL(10,2),
+    total DECIMAL(10,2),
+    cartSnapshot LONGTEXT,
+    status VARCHAR(20) DEFAULT 'completed',
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userID) REFERENCES tblUser(userID)
+)
+");
+
+
+// CREATE tblMessage
+
+mysqli_query($conn, "
+CREATE TABLE tblMessage (
+    messageID INT AUTO_INCREMENT PRIMARY KEY,
+    senderUserID INT NULL,
+    senderAdminID INT NULL,
+    recipientType ENUM('seller','admin','buyer') NOT NULL,
+    recipientUserID INT NULL,
+    itemID INT NULL,
+    subject VARCHAR(150) NOT NULL,
+    body TEXT NOT NULL,
+    isRead TINYINT(1) DEFAULT 0,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (senderUserID) REFERENCES tblUser(userID),
+    FOREIGN KEY (recipientUserID) REFERENCES tblUser(userID),
     FOREIGN KEY (itemID) REFERENCES tblClothes(itemID)
 )
 ");

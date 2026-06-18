@@ -3,10 +3,14 @@
 // Load all products from the data file
 $siteProducts = require __DIR__ . '/../data/products.php';
 
+require_once __DIR__ . '/schema.php';
+
 // Merge DB-backed seller items into the product list (if DB available)
 if (file_exists(__DIR__ . '/../data/DBConn.php')) {
     include_once __DIR__ . '/../data/DBConn.php';
     if (isset($conn) && $conn) {
+        ensure_pastimes_schema($conn);
+
         $dbItems = [];
         $res = $conn->query("SELECT c.*, u.username as sellerName, u.status as sellerStatus FROM tblClothes c LEFT JOIN tblUser u ON c.sellerID = u.userID ORDER BY c.itemID DESC");
         if ($res) {
@@ -28,16 +32,16 @@ if (file_exists(__DIR__ . '/../data/DBConn.php')) {
                     'id' => (string)$id,
                     'name' => $r['itemName'] ?? 'Seller Item',
                     'price' => isset($r['price']) ? (float)$r['price'] : 0,
-                    'category' => 'Tops',
-                    'size' => 'M',
-                    'condition' => 'Good',
+                    'category' => validate_listing_category($r['category'] ?? 'Tops'),
+                    'size' => validate_listing_size($r['size'] ?? 'M'),
+                    'condition' => validate_listing_condition($r['condition'] ?? 'Good'),
                     'description' => $r['description'] ?? '',
                     'image' => $image,
                     'images' => [$image],
                     'featured' => false,
                     'new' => false,
                     'sellerName' => $r['sellerName'] ?? null,
-                    // keep a reference to original DB id for internal use
+                    'sellerID' => isset($r['sellerID']) ? (int) $r['sellerID'] : 0,
                     'db_item_id' => (int)$r['itemID'],
                 ];
             }
@@ -259,6 +263,16 @@ function render_product_card($product)
                 >
                     Add to Cart
                 </button>
+                <button
+                    class="button button--ghost button--small"
+                    type="button"
+                    data-wishlist-toggle="<?= h($product['id']) ?>"
+                    data-product-name="<?= h($product['name']) ?>"
+                    data-wishlist-label-save="Save"
+                >
+                    <?= site_icon('heart', 'icon icon--tiny') ?>
+                    <span data-wishlist-label>Save</span>
+                </button>
             </div>
         </div>
     </article>
@@ -316,6 +330,10 @@ function render_page_start($options = array())
                         <div class="user-menu__dropdown" data-user-dropdown>
                             <p class="user-menu__email"><?= isset($_SESSION['email']) ? h($_SESSION['email']) : '' ?></p>
                             <hr class="user-menu__divider">
+                            <a class="user-menu__link" href="purchaseHistory.php">Purchase History</a>
+                            <a class="user-menu__link" href="messages.php">Messages</a>
+                            <a class="user-menu__link" href="Wishlist.php">Wishlist</a>
+                            <hr class="user-menu__divider">
                             <a class="user-menu__link" href="logout.php">Logout</a>
                         </div>
                     <?php else: ?>
@@ -324,6 +342,11 @@ function render_page_start($options = array())
                         </a>
                     <?php endif; ?>
                 </div>
+
+                <a class="cart-link" href="Wishlist.php" aria-label="Open wishlist">
+                    <?= site_icon('heart', 'icon icon--small') ?>
+                    <span class="cart-count" data-wishlist-count>0</span>
+                </a>
 
                 <a class="cart-link" href="Cart.php" aria-label="Open cart">
                     <?= site_icon('shopping-bag', 'icon icon--small') ?>
@@ -349,6 +372,7 @@ function render_page_start($options = array())
                 </div>
             </nav>
         </header>
+        <div class="wishlist-toast" data-wishlist-toast role="status" aria-live="polite"></div>
         <main class="site-main">
     <?php
 }
@@ -404,7 +428,7 @@ function render_page_end()
                 <p>&copy; <?= h(current_year()) ?> Pastimes. All rights reserved.</p>
             </div>
         </footer>
-        <script src="assets/js/app.js"></script>
+        <script src="assets/js/app.js?v=20250618"></script>
     </body>
     </html>
     <?php

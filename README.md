@@ -27,6 +27,8 @@ Pastimes is a full-stack e-commerce platform for curated secondhand fashion. Sho
 - Filter by category, size, and condition
 - Sort by price, newest, or featured
 - Responsive grid layout (2–4 columns)
+- Wishlist save button on products
+- Product page reviews and price alerts
 
 🔐 **Authentication System**
 - User registration with password hashing (bcrypt)
@@ -47,6 +49,7 @@ Pastimes is a full-stack e-commerce platform for curated secondhand fashion. Sho
 - Real-time cart count badge
 - Subtotal, shipping, and total calculations
 - Free shipping over R1500
+- Checkout submission creates a database record and reference number
 
 📱 **Responsive Design**
 - Mobile-first CSS Grid approach
@@ -203,6 +206,12 @@ All seed passwords are MD5 hashes for testing:
 - Quantity controls (+/-)
 - Price calculations with free shipping threshold
 - Real-time cart count badge in header
+- Checkout flow stores a reference number and writes the purchase to the database
+
+### Product Interaction
+- Wishlist page for saved items
+- Review form and review list on product pages
+- Price alert saved per product and rechecked on reload
 
 ### Product Filters
 - Category, Size, Condition dropdowns
@@ -323,4 +332,4 @@ See something broken or have an idea? Feel free to open an issue or reach out!
 
 
 
-                                         _Didintle Kutlwano Mokgoro
+                                         _Didintle Kutlwano Mokgoro     
