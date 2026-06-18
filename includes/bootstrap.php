@@ -3,10 +3,14 @@
 // Load all products from the data file
 $siteProducts = require __DIR__ . '/../data/products.php';
 
+require_once __DIR__ . '/schema.php';
+
 // Merge DB-backed seller items into the product list (if DB available)
 if (file_exists(__DIR__ . '/../data/DBConn.php')) {
     include_once __DIR__ . '/../data/DBConn.php';
     if (isset($conn) && $conn) {
+        ensure_pastimes_schema($conn);
+
         $dbItems = [];
         $res = $conn->query("SELECT c.*, u.username as sellerName, u.status as sellerStatus FROM tblClothes c LEFT JOIN tblUser u ON c.sellerID = u.userID ORDER BY c.itemID DESC");
         if ($res) {
@@ -28,16 +32,16 @@ if (file_exists(__DIR__ . '/../data/DBConn.php')) {
                     'id' => (string)$id,
                     'name' => $r['itemName'] ?? 'Seller Item',
                     'price' => isset($r['price']) ? (float)$r['price'] : 0,
-                    'category' => 'Tops',
-                    'size' => 'M',
-                    'condition' => 'Good',
+                    'category' => validate_listing_category($r['category'] ?? 'Tops'),
+                    'size' => validate_listing_size($r['size'] ?? 'M'),
+                    'condition' => validate_listing_condition($r['condition'] ?? 'Good'),
                     'description' => $r['description'] ?? '',
                     'image' => $image,
                     'images' => [$image],
                     'featured' => false,
                     'new' => false,
                     'sellerName' => $r['sellerName'] ?? null,
-                    // keep a reference to original DB id for internal use
+                    'sellerID' => isset($r['sellerID']) ? (int) $r['sellerID'] : 0,
                     'db_item_id' => (int)$r['itemID'],
                 ];
             }

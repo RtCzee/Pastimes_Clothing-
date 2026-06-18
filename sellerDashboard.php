@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once 'data/DBConn.php';
+require_once 'includes/schema.php';
 
 if (!isset($_SESSION['userID']) || $_SESSION['role'] !== 'seller') {
     header('Location: login.php');
@@ -14,17 +15,7 @@ $firstName  = explode(' ', $_SESSION['fullName'] ?? $sellerName)[0];
 $message = '';
 $error   = '';
 
-// Ensure the live schema has the sellerID column used by this dashboard.
-$columnCheck = $conn->query("SHOW COLUMNS FROM tblClothes LIKE 'sellerID'");
-if (!$columnCheck) {
-  die('Unable to verify listing schema: ' . $conn->error);
-}
-
-if ($columnCheck->num_rows === 0) {
-  if (!$conn->query("ALTER TABLE tblClothes ADD COLUMN sellerID INT NULL")) {
-    die('Unable to update listing schema: ' . $conn->error);
-  }
-}
+ensure_pastimes_schema($conn);
 
 // DELETE
 if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
@@ -59,6 +50,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $itemName    = trim($_POST['itemName'] ?? '');
     $description = trim($_POST['description'] ?? '');
     $price       = trim($_POST['price'] ?? '');
+    $category    = validate_listing_category(trim($_POST['category'] ?? 'Tops'));
+    $size        = validate_listing_size(trim($_POST['size'] ?? 'M'));
+    $condition   = validate_listing_condition(trim($_POST['condition'] ?? 'Good'));
     $imagePath   = '';
 
     if (empty($itemName) || empty($price)) {
@@ -86,18 +80,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($error)) {
             if ($itemID) {
                 if (!empty($imagePath)) {
-                    $stmt = $conn->prepare("UPDATE tblClothes SET itemName=?, description=?, price=?, image=? WHERE itemID=? AND sellerID=?");
+                    $stmt = $conn->prepare("UPDATE tblClothes SET itemName=?, description=?, price=?, category=?, size=?, `condition`=?, image=? WHERE itemID=? AND sellerID=?");
                     if (!$stmt) {
                         $error = 'Unable to prepare update query: ' . $conn->error;
                     } else {
-                        $stmt->bind_param("ssdsii", $itemName, $description, $price, $imagePath, $itemID, $sellerID);
+                        $stmt->bind_param("ssdssssii", $itemName, $description, $price, $category, $size, $condition, $imagePath, $itemID, $sellerID);
                     }
                 } else {
-                    $stmt = $conn->prepare("UPDATE tblClothes SET itemName=?, description=?, price=? WHERE itemID=? AND sellerID=?");
+                    $stmt = $conn->prepare("UPDATE tblClothes SET itemName=?, description=?, price=?, category=?, size=?, `condition`=? WHERE itemID=? AND sellerID=?");
                     if (!$stmt) {
                         $error = 'Unable to prepare update query: ' . $conn->error;
                     } else {
-                        $stmt->bind_param("ssdii", $itemName, $description, $price, $itemID, $sellerID);
+                        $stmt->bind_param("ssdsssii", $itemName, $description, $price, $category, $size, $condition, $itemID, $sellerID);
                     }
                 }
                 if (empty($error)) {
@@ -107,11 +101,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $editItem = null;
                 }
             } else {
-                $stmt = $conn->prepare("INSERT INTO tblClothes (sellerID, itemName, description, price, image) VALUES (?, ?, ?, ?, ?)");
+                $stmt = $conn->prepare("INSERT INTO tblClothes (sellerID, itemName, description, price, category, size, `condition`, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
                 if (!$stmt) {
                     $error = 'Unable to prepare insert query: ' . $conn->error;
                 } else {
-                    $stmt->bind_param("issds", $sellerID, $itemName, $description, $price, $imagePath);
+                    $stmt->bind_param("issdssss", $sellerID, $itemName, $description, $price, $category, $size, $condition, $imagePath);
                     $stmt->execute();
                     $stmt->close();
                     $message = 'Item added successfully.';
@@ -169,9 +163,9 @@ $totalValue = array_sum(array_column($items, 'price'));
     .form-card__title{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:600;margin:0 0 2rem;color:var(--foreground);letter-spacing:-.01em}
     .form-card__grid{display:grid;grid-template-columns:1fr;gap:1.25rem}
     .form-card label{display:block;font-size:.75rem;color:var(--muted);margin-bottom:.5rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
-    .form-card input[type=text],.form-card input[type=number],.form-card input[type=file],.form-card textarea{width:100%;padding:.9rem 1rem;border:1.5px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--foreground);font-family:'Inter',sans-serif;font-size:.95rem;transition:all .2s}
+    .form-card input[type=text],.form-card input[type=number],.form-card input[type=file],.form-card textarea,.form-card select{width:100%;padding:.9rem 1rem;border:1.5px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--foreground);font-family:'Inter',sans-serif;font-size:.95rem;transition:all .2s}
     .form-card input[type=file]{padding:.5rem .9rem;background:var(--secondary)}
-    .form-card input:focus,.form-card textarea:focus{outline:none;border-color:var(--foreground);box-shadow:0 0 0 3px rgba(0,0,0,.05)}
+    .form-card input:focus,.form-card textarea:focus,.form-card select:focus{outline:none;border-color:var(--foreground);box-shadow:0 0 0 3px rgba(0,0,0,.05)}
     .form-card textarea{min-height:5.5rem;resize:vertical;font-family:'Inter',sans-serif}
     .form-card__footer{display:flex;gap:1rem;flex-wrap:wrap;margin-top:2rem;padding-top:2rem;border-top:1px solid var(--border)}
     .req{color:#ef4444;font-weight:600}
@@ -189,6 +183,7 @@ $totalValue = array_sum(array_column($items, 'price'));
     .listing-card__body{padding:1.25rem;flex:1;display:flex;flex-direction:column;gap:.5rem}
     .listing-card__name{margin:0;font-size:1rem;font-weight:600;color:var(--foreground);line-height:1.3}
     .listing-card__desc{margin:0;font-size:.85rem;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .listing-card__meta{margin:0;font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
     .listing-card__price{margin-top:auto;padding-top:.75rem;font-size:1.1rem;font-weight:700;color:var(--accent)}
     .listing-card__actions{display:flex;gap:.75rem;padding:1.25rem;border-top:1px solid var(--border);background:var(--secondary);flex-wrap:wrap}\n    .listing-card__actions .button{flex:1;min-width:80px;font-size:.85rem}
     .listings-empty{text-align:center;padding:5rem 2rem}
@@ -282,7 +277,7 @@ $totalValue = array_sum(array_column($items, 'price'));
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
           </div>
           <h3>List in Minutes</h3>
-          <p>Add a name, description, price and photo — your item goes live in the store instantly.</p>
+          <p>Add a name, description, price, category, size, condition and photo — your item goes live in the store instantly.</p>
         </article>
         <article class="value-card">
           <div class="value-card__icon">
@@ -339,6 +334,42 @@ $totalValue = array_sum(array_column($items, 'price'));
             </div>
 
             <div>
+              <label for="category">Category <span class="req">*</span></label>
+              <select id="category" name="category" required>
+                <?php
+                $selectedCategory = $editItem['category'] ?? $_POST['category'] ?? 'Tops';
+                foreach (listing_category_options() as $option):
+                ?>
+                  <option value="<?= htmlspecialchars($option) ?>"<?= $selectedCategory === $option ? ' selected' : '' ?>><?= htmlspecialchars($option) ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+
+            <div>
+              <label for="size">Size <span class="req">*</span></label>
+              <select id="size" name="size" required>
+                <?php
+                $selectedSize = $editItem['size'] ?? $_POST['size'] ?? 'M';
+                foreach (listing_size_options() as $option):
+                ?>
+                  <option value="<?= htmlspecialchars($option) ?>"<?= $selectedSize === $option ? ' selected' : '' ?>><?= htmlspecialchars($option) ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+
+            <div>
+              <label for="condition">Condition <span class="req">*</span></label>
+              <select id="condition" name="condition" required>
+                <?php
+                $selectedCondition = $editItem['condition'] ?? $_POST['condition'] ?? 'Good';
+                foreach (listing_condition_options() as $option):
+                ?>
+                  <option value="<?= htmlspecialchars($option) ?>"<?= $selectedCondition === $option ? ' selected' : '' ?>><?= htmlspecialchars($option) ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+
+            <div>
               <label for="image">Item Photo <?= $editItem ? '(leave blank to keep current)' : '' ?></label>
               <input type="file" id="image" name="image" accept=".jpg,.jpeg,.png,.webp">
               <?php if ($editItem && !empty($editItem['image'])): ?>
@@ -351,7 +382,7 @@ $totalValue = array_sum(array_column($items, 'price'));
             <div class="span-2">
               <label for="description">Description</label>
               <textarea id="description" name="description"
-                placeholder="Describe the item — brand, material, size, condition..."><?= htmlspecialchars($editItem['description'] ?? $_POST['description'] ?? '') ?></textarea>
+                placeholder="Describe the item — brand, material, fit notes..."><?= htmlspecialchars($editItem['description'] ?? $_POST['description'] ?? '') ?></textarea>
             </div>
 
           </div>
@@ -394,6 +425,11 @@ $totalValue = array_sum(array_column($items, 'price'));
               </div>
               <div class="listing-card__body">
                 <h3 class="listing-card__name"><?= htmlspecialchars($item['itemName']) ?></h3>
+                <p class="listing-card__meta">
+                  <?= htmlspecialchars(validate_listing_category($item['category'] ?? 'Tops')) ?>
+                  &middot; Size <?= htmlspecialchars(validate_listing_size($item['size'] ?? 'M')) ?>
+                  &middot; <?= htmlspecialchars(validate_listing_condition($item['condition'] ?? 'Good')) ?>
+                </p>
                 <?php if (!empty($item['description'])): ?>
                   <p class="listing-card__desc"><?= htmlspecialchars($item['description']) ?></p>
                 <?php endif; ?>

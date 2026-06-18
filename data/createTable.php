@@ -4,6 +4,7 @@ include(__DIR__ . "/DBConn.php");
 
   // DROP TABLES (IMPORTANT ORDER)
 
+mysqli_query($conn, "DROP TABLE IF EXISTS tblMessage");
 mysqli_query($conn, "DROP TABLE IF EXISTS tblAorder");
 mysqli_query($conn, "DROP TABLE IF EXISTS tblClothes");
 mysqli_query($conn, "DROP TABLE IF EXISTS tblAdmin");
@@ -48,6 +49,9 @@ CREATE TABLE tblClothes (
     itemName VARCHAR(100),
     description VARCHAR(255),
     price DECIMAL(10,2),
+    category VARCHAR(50) DEFAULT 'Tops',
+    size VARCHAR(20) DEFAULT 'M',
+    `condition` VARCHAR(20) DEFAULT 'Good',
     image VARCHAR(200),
     FOREIGN KEY (sellerID) REFERENCES tblUser(userID)
 )
@@ -102,6 +106,26 @@ CREATE TABLE tblCheckout (
     status VARCHAR(20) DEFAULT 'completed',
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (userID) REFERENCES tblUser(userID)
+)
+");
+
+
+// CREATE tblMessage
+
+mysqli_query($conn, "
+CREATE TABLE tblMessage (
+    messageID INT AUTO_INCREMENT PRIMARY KEY,
+    senderUserID INT NOT NULL,
+    recipientType ENUM('seller','admin') NOT NULL,
+    recipientUserID INT NULL,
+    itemID INT NULL,
+    subject VARCHAR(150) NOT NULL,
+    body TEXT NOT NULL,
+    isRead TINYINT(1) DEFAULT 0,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (senderUserID) REFERENCES tblUser(userID),
+    FOREIGN KEY (recipientUserID) REFERENCES tblUser(userID),
+    FOREIGN KEY (itemID) REFERENCES tblClothes(itemID)
 )
 ");
 
