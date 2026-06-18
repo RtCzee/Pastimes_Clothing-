@@ -16,7 +16,7 @@ render_page_start([
 
         <div class="product-grid product-grid--shop" data-wishlist-grid></div>
 
-        <div class="empty-state" data-wishlist-empty>
+        <div class="empty-state is-hidden" data-wishlist-empty>
             <p>Your wishlist is empty.</p>
             <a class="button button--outline" href="Shop.php">Browse products</a>
         </div>

@@ -119,23 +119,47 @@
     document.querySelectorAll("[data-wishlist-toggle]").forEach((button) => {
       const id = button.getAttribute("data-wishlist-toggle");
       const active = isWishlisted(id);
+      const saveLabel = button.getAttribute("data-wishlist-label-save") || "Save";
+      const labelNode = button.querySelector("[data-wishlist-label]");
+
       button.classList.toggle("is-active", active);
       button.setAttribute("aria-pressed", active ? "true" : "false");
-      button.innerHTML = active
-        ? "<svg class='icon icon--tiny' viewBox='0 0 24 24' fill='currentColor' aria-hidden='true'><path d='m12 21-1.4-1.2C5.4 15 2 11.9 2 8a4 4 0 0 1 7-2.6A4 4 0 0 1 16 8c0 3.9-3.4 7-8.6 11.8Z'/></svg> Saved"
-        : "<svg class='icon icon--tiny' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='m12 21-1.4-1.2C5.4 15 2 11.9 2 8a4 4 0 0 1 7-2.6A4 4 0 0 1 16 8c0 3.9-3.4 7-8.6 11.8Z'/></svg> Save";
+
+      if (labelNode) {
+        labelNode.textContent = active ? "Saved" : saveLabel;
+      } else {
+        button.textContent = active ? "Saved" : saveLabel;
+      }
     });
   };
 
   const toggleWishlist = (productId) => {
+    if (!productId) {
+      return;
+    }
+
     const wishlist = readWishlist();
     const index = wishlist.findIndex((item) => String(item.id) === String(productId));
+    const added = index < 0;
+
     if (index >= 0) {
       wishlist.splice(index, 1);
     } else {
       wishlist.push({ id: String(productId) });
     }
+
     writeWishlist(wishlist);
+
+    const product = getProductById(productId);
+    const toast = document.querySelector("[data-wishlist-toast]");
+    if (toast) {
+      toast.textContent = added
+        ? `${product?.name || "Item"} added to wishlist`
+        : `${product?.name || "Item"} removed from wishlist`;
+      toast.classList.add("is-visible");
+      window.clearTimeout(toast._hideTimer);
+      toast._hideTimer = window.setTimeout(() => toast.classList.remove("is-visible"), 2200);
+    }
   };
 
   const renderWishlistPage = () => {
@@ -174,7 +198,7 @@
               </div>
               <div class="product-card__bottom">
                 <div class="product-card__price-wrap"><span class="product-card__price">${formatPrice(item.price)}</span></div>
-                <button class="button button--ghost button--small" type="button" data-wishlist-toggle="${item.id}">Saved</button>
+                <button class="button button--ghost button--small is-active" type="button" data-wishlist-toggle="${item.id}" data-wishlist-label-save="Save"><span data-wishlist-label>Saved</span></button>
               </div>
             </div>
           </article>
@@ -212,29 +236,27 @@
     //this function initializes the wishlist toggle buttons on product cards and the wishlist page. It adds click event listeners to all buttons with the data attribute "data-wishlist-toggle" to call the toggleWishlist 
     // function when clicked. It also calls syncWishlistButtons to update the button states based on the current wishlist and refreshWishlistCount to update the wishlist count badge in the UI.
   const initWishlistButtons = () => {
-    document.querySelectorAll("[data-wishlist-toggle]").forEach((button) => {
-      button.addEventListener("click", () => toggleWishlist(button.getAttribute("data-wishlist-toggle")));
+    document.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-wishlist-toggle]");
+      if (!button) {
+        return;
+      }
+
+      event.preventDefault();
+      toggleWishlist(button.getAttribute("data-wishlist-toggle"));
     });
+
     syncWishlistButtons();
     refreshWishlistCount();
   };
-      // this function initializes the wishlist page by checking if the 
-      // wishlist grid exists on the page. If it does, it renders the wishlist items and sets up an event listener for clicks on wishlist toggle buttons 
-      // to re-render the wishlist when items are added or removed. This ensures that the wishlist page reflects the current state of the user's saved items.
+
   const initWishlistPage = () => {
     if (!document.querySelector("[data-wishlist-grid]")) {
       return;
     }
-      //  then it calls renderWishlistPage to display the current wishlist items and sets up a click event listener on the document to listen for any clicks on elements with the 
-      // data attribute "data-wishlist-toggle". When such a button is clicked, it re-renders the wishlist page to reflect any changes made to the wishlist.
+
     renderWishlistPage();
-    document.addEventListener("click", (event) => {
-      const button = event.target.closest("[data-wishlist-toggle]");
-      if (button) {
-        renderWishlistPage();
-      }
-    });
-  };    // this function initiaizes the price alert from the product details page.
+  };
 
   const initPriceAlerts = () => {
     const form = document.querySelector("[data-price-alert-form]");

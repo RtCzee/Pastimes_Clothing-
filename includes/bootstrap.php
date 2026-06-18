@@ -268,8 +268,10 @@ function render_product_card($product)
                     type="button"
                     data-wishlist-toggle="<?= h($product['id']) ?>"
                     data-product-name="<?= h($product['name']) ?>"
+                    data-wishlist-label-save="Save"
                 >
-                    <?= site_icon('heart', 'icon icon--tiny') ?> Save
+                    <?= site_icon('heart', 'icon icon--tiny') ?>
+                    <span data-wishlist-label>Save</span>
                 </button>
             </div>
         </div>
@@ -366,6 +368,7 @@ function render_page_start($options = array())
                 </div>
             </nav>
         </header>
+        <div class="wishlist-toast" data-wishlist-toast role="status" aria-live="polite"></div>
         <main class="site-main">
     <?php
 }

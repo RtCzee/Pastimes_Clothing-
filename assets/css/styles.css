@@ -1793,3 +1793,37 @@ button {
 @media (prefers-reduced-motion: reduce) {
   .is-animated, .hero__content, .value-card, .product-card, .banner__content, .section-heading, .hero__media img { transition: none !important; transform: none !important; opacity: 1 !important; }
 }
+
+.button[data-wishlist-toggle].is-active {
+  color: var(--foreground);
+  border-color: var(--foreground);
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.button[data-wishlist-toggle].is-active .icon {
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.wishlist-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%) translateY(120%);
+  z-index: 1200;
+  background: var(--foreground);
+  color: var(--white);
+  padding: 0.75rem 1.1rem;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 220ms ease, opacity 220ms ease;
+}
+
+.wishlist-toast.is-visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}

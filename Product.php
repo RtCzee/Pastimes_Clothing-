@@ -167,8 +167,9 @@ render_page_start([
                     <span data-product-add-label>Add to Cart</span>
                 </button>
 
-                <button class="button button--outline button--full" type="button" data-wishlist-toggle="<?= h($product['id']) ?>" data-product-name="<?= h($product['name']) ?>">
-                    <?= site_icon('heart', 'icon icon--small') ?> Save to Wishlist
+                <button class="button button--outline button--full" type="button" data-wishlist-toggle="<?= h($product['id']) ?>" data-product-name="<?= h($product['name']) ?>" data-wishlist-label-save="Save to Wishlist">
+                    <?= site_icon('heart', 'icon icon--small') ?>
+                    <span data-wishlist-label>Save to Wishlist</span>
                 </button>
 
                 <div class="alert-card">

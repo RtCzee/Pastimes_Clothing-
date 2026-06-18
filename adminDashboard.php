@@ -64,6 +64,7 @@ $activeCount = mysqli_num_rows($active);
                 <div class="auth-sub" style="text-align:left; margin-bottom:0;">Review registrations and keep the member list in shape.</div>
             </div>
             <div class="admin-dashboard-actions">
+                <a href="adminItems.php" class="admin-secondary-link">Manage Items</a>
                 <a href="logout.php" class="admin-secondary-link">Logout Admin</a>
             </div>
         </div>
