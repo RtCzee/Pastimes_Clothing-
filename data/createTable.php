@@ -115,8 +115,9 @@ CREATE TABLE tblCheckout (
 mysqli_query($conn, "
 CREATE TABLE tblMessage (
     messageID INT AUTO_INCREMENT PRIMARY KEY,
-    senderUserID INT NOT NULL,
-    recipientType ENUM('seller','admin') NOT NULL,
+    senderUserID INT NULL,
+    senderAdminID INT NULL,
+    recipientType ENUM('seller','admin','buyer') NOT NULL,
     recipientUserID INT NULL,
     itemID INT NULL,
     subject VARCHAR(150) NOT NULL,

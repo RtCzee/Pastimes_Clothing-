@@ -330,6 +330,10 @@ function render_page_start($options = array())
                         <div class="user-menu__dropdown" data-user-dropdown>
                             <p class="user-menu__email"><?= isset($_SESSION['email']) ? h($_SESSION['email']) : '' ?></p>
                             <hr class="user-menu__divider">
+                            <a class="user-menu__link" href="purchaseHistory.php">Purchase History</a>
+                            <a class="user-menu__link" href="messages.php">Messages</a>
+                            <a class="user-menu__link" href="Wishlist.php">Wishlist</a>
+                            <hr class="user-menu__divider">
                             <a class="user-menu__link" href="logout.php">Logout</a>
                         </div>
                     <?php else: ?>
@@ -424,7 +428,7 @@ function render_page_end()
                 <p>&copy; <?= h(current_year()) ?> Pastimes. All rights reserved.</p>
             </div>
         </footer>
-        <script src="assets/js/app.js"></script>
+        <script src="assets/js/app.js?v=20250618"></script>
     </body>
     </html>
     <?php

@@ -4,6 +4,8 @@ require_once __DIR__ . '/includes/bootstrap.php';
 
 header('Content-Type: application/json');
 
+ensure_pastimes_schema($conn);
+
 if (!isset($_SESSION['userID']) || ($_SESSION['role'] ?? 'buyer') === '') {
     echo json_encode([
         'success' => false,

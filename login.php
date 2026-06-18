@@ -6,11 +6,21 @@ $error = null;
 $userData = null;
 $checkoutSuccess = isset($_GET['checkout']) && $_GET['checkout'] === 'success';
 $checkoutReference = isset($_GET['reference']) ? trim($_GET['reference']) : '';
+$redirectAfter = isset($_GET['redirect']) ? trim($_GET['redirect']) : '';
+if ($redirectAfter !== '' && !preg_match('/^[A-Za-z0-9_.?=&%-]+$/', $redirectAfter)) {
+  $redirectAfter = '';
+}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $username = isset($_POST['username']) ? trim($_POST['username']) : '';
   $email = isset($_POST['email']) ? trim($_POST['email']) : '';
   $password = isset($_POST['password']) ? $_POST['password'] : '';
+  if ($redirectAfter === '' && isset($_POST['redirect'])) {
+    $redirectAfter = trim($_POST['redirect']);
+    if ($redirectAfter !== '' && !preg_match('/^[A-Za-z0-9_.?=&%-]+$/', $redirectAfter)) {
+      $redirectAfter = '';
+    }
+  }
 
   // Validate that at least one identifier is provided
   if (empty($username) && empty($email)) {
@@ -59,6 +69,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['fullName'] = $user['fullName'];
         $_SESSION['role'] = $user['role'] ?? 'buyer';
         $_SESSION['logged_in'] = true;
+
+        if ($redirectAfter !== '') {
+          header('Location: ' . $redirectAfter);
+          exit;
+        }
+
         $userData = $user;
       }
     }
@@ -146,6 +162,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <?php endif; ?>
 
     <form method="POST">
+      <?php if ($redirectAfter !== ''): ?>
+        <input type="hidden" name="redirect" value="<?= htmlspecialchars($redirectAfter) ?>">
+      <?php endif; ?>
       <div class="form-group">
         <label class="form-label">Username</label>
         <input 

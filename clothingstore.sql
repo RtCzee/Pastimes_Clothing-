@@ -141,8 +141,9 @@ INSERT INTO `tblclothes` (`itemID`, `itemName`, `description`, `price`, `categor
 DROP TABLE IF EXISTS `tblmessage`;
 CREATE TABLE IF NOT EXISTS `tblmessage` (
   `messageID` int(11) NOT NULL AUTO_INCREMENT,
-  `senderUserID` int(11) NOT NULL,
-  `recipientType` enum('seller','admin') NOT NULL,
+  `senderUserID` int(11) DEFAULT NULL,
+  `senderAdminID` int(11) DEFAULT NULL,
+  `recipientType` enum('seller','admin','buyer') NOT NULL,
   `recipientUserID` int(11) DEFAULT NULL,
   `itemID` int(11) DEFAULT NULL,
   `subject` varchar(150) NOT NULL,

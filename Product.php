@@ -172,6 +172,24 @@ render_page_start([
                     <span data-wishlist-label>Save to Wishlist</span>
                 </button>
 
+                <?php if (!empty($product['db_item_id']) && !empty($product['sellerID'])): ?>
+                    <?php if (isset($_SESSION['userID'])): ?>
+                        <a class="button button--ghost button--full" href="messages.php?item=<?= (int) $product['db_item_id'] ?>">
+                            <?= site_icon('mail', 'icon icon--small') ?> Enquire about this item
+                        </a>
+                    <?php else: ?>
+                        <a class="button button--ghost button--full" href="login.php?redirect=<?= urlencode('messages.php?item=' . (int) $product['db_item_id']) ?>">
+                            <?= site_icon('mail', 'icon icon--small') ?> Log in to enquire
+                        </a>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <?php if (isset($_SESSION['userID'])): ?>
+                        <a class="button button--ghost button--full" href="messages.php?to=admin&amp;subject=<?= urlencode('Question about: ' . $product['name']) ?>">
+                            <?= site_icon('mail', 'icon icon--small') ?> Message admin about this item
+                        </a>
+                    <?php endif; ?>
+                <?php endif; ?>
+
                 <div class="alert-card">
                     <div class="alert-card__head">
                         <strong>Price Drop Alert</strong>

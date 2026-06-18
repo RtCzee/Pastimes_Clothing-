@@ -91,7 +91,29 @@
     window.localStorage.setItem(key, JSON.stringify(value));
   };
 
+  const formatPrice = (value) =>
+    `R${new Intl.NumberFormat("en-ZA", { maximumFractionDigits: 0 }).format(value)}`;
+
+  const escapeHtml = (value) =>
+    String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+
   const readWishlist = () => readJsonStorage(WISHLIST_KEY);
+
+  const resolveWishlistProduct = (entry) => {
+    const fromCatalog = getProductById(entry.id);
+    if (fromCatalog) {
+      return fromCatalog;
+    }
+    if (entry && entry.name && entry.image) {
+      return entry;
+    }
+    return null;
+  };
+
   const writeWishlist = (wishlist) => {
     writeJsonStorage(WISHLIST_KEY, wishlist);
     refreshWishlistCount();
@@ -145,7 +167,16 @@
     if (index >= 0) {
       wishlist.splice(index, 1);
     } else {
-      wishlist.push({ id: String(productId) });
+      const product = getProductById(productId);
+      wishlist.push({
+        id: String(productId),
+        name: product?.name || "Saved item",
+        price: product?.price || 0,
+        image: product?.image || "assets/images/product-placeholder.jpg",
+        category: product?.category || "Tops",
+        size: product?.size || "M",
+        condition: product?.condition || "Good",
+      });
     }
 
     writeWishlist(wishlist);
@@ -169,36 +200,45 @@
     }
 
     const empty = document.querySelector("[data-wishlist-empty]");
-    const saved = readWishlist()
-      .map((item) => getProductById(item.id))
-      .filter(Boolean);
+    const pageWrap = document.querySelector("[data-wishlist-page]");
+    const saved = readWishlist().map(resolveWishlistProduct).filter(Boolean);
 
     if (saved.length === 0) {
       grid.innerHTML = "";
+      if (pageWrap) pageWrap.classList.add("is-hidden");
       if (empty) empty.classList.remove("is-hidden");
       return;
     }
 
+    if (pageWrap) pageWrap.classList.remove("is-hidden");
     if (empty) empty.classList.add("is-hidden");
     grid.innerHTML = saved
       .map(
         (item) => `
-          <article class="product-card">
-            <a class="product-card__image-link" href="Product.php?id=${item.id}">
+          <article class="product-card revealed" data-product-id="${escapeHtml(item.id)}">
+            <a class="product-card__image-link" href="Product.php?id=${encodeURIComponent(item.id)}">
               <div class="product-card__image-wrap">
-                <img class="product-card__image" src="${item.image}" alt="${item.name}">
+                <img class="product-card__image" src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">
               </div>
             </a>
             <div class="product-card__body">
               <div class="product-card__top">
                 <div>
-                  <a class="product-card__title-link" href="Product.php?id=${item.id}"><h3 class="product-card__title">${item.name}</h3></a>
-                  <p class="product-card__meta">${item.category} &middot; Size ${item.size}</p>
+                  <a class="product-card__title-link" href="Product.php?id=${encodeURIComponent(item.id)}">
+                    <h3 class="product-card__title">${escapeHtml(item.name)}</h3>
+                  </a>
+                  <p class="product-card__meta">${escapeHtml(item.category)} &middot; Size ${escapeHtml(item.size)}</p>
                 </div>
               </div>
               <div class="product-card__bottom">
-                <div class="product-card__price-wrap"><span class="product-card__price">${formatPrice(item.price)}</span></div>
-                <button class="button button--ghost button--small is-active" type="button" data-wishlist-toggle="${item.id}" data-wishlist-label-save="Save"><span data-wishlist-label>Saved</span></button>
+                <div class="product-card__price-wrap">
+                  <span class="product-card__price">${formatPrice(item.price)}</span>
+                </div>
+                <button class="button button--outline button--small" type="button" data-add-to-cart="${escapeHtml(item.id)}">Add to Cart</button>
+                <button class="button button--ghost button--small is-active" type="button" data-wishlist-toggle="${escapeHtml(item.id)}" data-wishlist-label-save="Save">
+                  <svg class="icon icon--tiny" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 21-1.4-1.2C5.4 15 2 11.9 2 8a4 4 0 0 1 7-2.6A4 4 0 0 1 16 8c0 3.9-3.4 7-8.6 11.8Z"/></svg>
+                  <span data-wishlist-label>Saved</span>
+                </button>
               </div>
             </div>
           </article>
@@ -237,13 +277,19 @@
     // function when clicked. It also calls syncWishlistButtons to update the button states based on the current wishlist and refreshWishlistCount to update the wishlist count badge in the UI.
   const initWishlistButtons = () => {
     document.addEventListener("click", (event) => {
-      const button = event.target.closest("[data-wishlist-toggle]");
-      if (!button) {
+      const wishlistButton = event.target.closest("[data-wishlist-toggle]");
+      if (wishlistButton) {
+        event.preventDefault();
+        event.stopPropagation();
+        toggleWishlist(wishlistButton.getAttribute("data-wishlist-toggle"));
         return;
       }
 
-      event.preventDefault();
-      toggleWishlist(button.getAttribute("data-wishlist-toggle"));
+      const cartButton = event.target.closest("[data-add-to-cart]");
+      if (cartButton) {
+        event.preventDefault();
+        addToCart(cartButton.getAttribute("data-add-to-cart"));
+      }
     });
 
     syncWishlistButtons();
@@ -289,10 +335,6 @@
     updatePriceAlertState();
   };
 
-  // Format number as South African Rand currency
-  const formatPrice = (value) =>
-    `R${new Intl.NumberFormat("en-ZA", { maximumFractionDigits: 0 }).format(value)}`;
-
   // Toggle mobile menu visibility
   const initMenu = () => {
     const toggle = document.querySelector("[data-menu-toggle]");
@@ -319,12 +361,6 @@
 
   // Setup add to cart buttons on product cards and detail page
   const initAddToCartButtons = () => {
-    document.querySelectorAll("[data-add-to-cart]").forEach((button) => {
-      button.addEventListener("click", () => {
-        addToCart(button.getAttribute("data-add-to-cart"));
-      });
-    });
-
     const detailButton = document.querySelector("[data-product-add]");
     const detailLabel = document.querySelector("[data-product-add-label]");
     if (detailButton && detailLabel) {

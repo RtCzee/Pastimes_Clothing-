@@ -65,6 +65,7 @@ $activeCount = mysqli_num_rows($active);
             </div>
             <div class="admin-dashboard-actions">
                 <a href="adminItems.php" class="admin-secondary-link">Manage Items</a>
+                <a href="adminMessages.php" class="admin-secondary-link">Messages</a>
                 <a href="logout.php" class="admin-secondary-link">Logout Admin</a>
             </div>
         </div>

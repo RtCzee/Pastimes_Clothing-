@@ -206,6 +206,7 @@ $totalValue = array_sum(array_column($items, 'price'));
         <a href="Shop.php" class="site-nav__link">Shop</a>
         <a href="About.php" class="site-nav__link">About</a>
         <a href="Contact.php" class="site-nav__link">Contact</a>
+        <a href="messages.php" class="site-nav__link">Messages</a>
         <a href="sellerDashboard.php" class="site-nav__link is-active">My Listings</a>
       </nav>
       <div class="site-header__actions">
@@ -223,6 +224,7 @@ $totalValue = array_sum(array_column($items, 'price'));
         <a href="index.php" class="site-nav__link">Home</a>
         <a href="Shop.php" class="site-nav__link">Shop</a>
         <a href="About.php" class="site-nav__link">About</a>
+        <a href="messages.php" class="site-nav__link">Messages</a>
         <a href="sellerDashboard.php" class="site-nav__link is-active">My Listings</a>
         <a href="logout.php" class="site-nav__link">Sign out</a>
       </div>
